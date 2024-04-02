@@ -25,13 +25,20 @@ This project manages context menu plugins to extend functionality in various dir
 
 3. Create a virtual environment:
     ```
-    python -m venv env
+    python3 -m venv env
+    ```
+    For Windows
+    ```
     env\Scripts\activate
+    ```
+    For Linux
+    ```
+    env/bin/activate
     ```
 
 4. Install the requirements
     ```
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 
 5. Specify your Figma API key (optional):
@@ -39,15 +46,19 @@ This project manages context menu plugins to extend functionality in various dir
     >   1. From the file browser, click the account menu in the top-left corner and select Settings.
     >   2. Scroll to the Personal access tokens section.
     >   3. Enter a name for your new token and press Enter.
-    >   4. Copy the token that is generated and replace **your_api_key** with your API key
+    >   4. Copy the token that is generated and replace **your_api_key** with your FIGMA API key
     ```
     echo FIGMA_API_KEY="your_api_key" > .env
     ```
 
 6. Run the program
     ```
-    python main.py
+    python3 main.py
     ```
+
+## Warning
+   - **Folder Relocation or Renaming**: If you move the project folder to a different location or rename it, you'll need to rerun `main.py`. Else the options will no longer work.
+   - **Figma API Key**: The Figma API key is optional. If you choose to use it, ensure that you keep it secure. It's required to download up-to-date template for PDF ID Cards Example plugin.
 
 ## Creating a Plugin
 1. **Create Python Script**:
@@ -56,7 +67,15 @@ This project manages context menu plugins to extend functionality in various dir
 
 2. **Define Metadata**:
     - Define a dictionary named `plugin_info` containing metadata about the plugin.
-    - Metadata includes `title`, `description`, `type`, and `menu_name`.
+    - Metadata includes `title`, `description` (optional), `type`, and `menu_name`.
+      - `title` is the name of the script that is desplayed as an item in context menu.
+      - `description` (optional) is the description of the script.
+      - `type` is the type of the plugin. It can be one or more of:
+        - `DIRECTORY` for opening on a directory.
+        - `DIRECTORY_BACKGROUND` for opening on the background of the directory.
+        - `DRIVE` for opening on the drives(think USBs).
+        - `FILES` for opening on a file.
+      - `menu_name` is the name of the menu item that will be displayed in the context menu.
     - Example:
     ```python
     plugin_info = {
@@ -91,4 +110,7 @@ This project manages context menu plugins to extend functionality in various dir
 This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).
 
 ## Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests to improve ABD Utils.
+Contributions are welcome! Feel free to open issues or submit pull requests to improve this project.
+
+## Credits
+Shout out to [@saleguas](https://github.com/saleguas) for making [`context-menu`](https://github.com/saleguas/context_menu) python package.
