@@ -105,6 +105,7 @@ This project manages context menu plugins to extend functionality in various dir
 - **Remove Empty Folders:** Recursively remove empty folders within directories.
 - **Remove Extra Executables:** Delete redundant C/C++ executable files.
 - **Unpack Files From Folder:** Move files from subfolders to parent directories.
+- **Copy File Content:** Copy the content of all files in the current directory to the clipboard.
 
 ## License
 This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).
