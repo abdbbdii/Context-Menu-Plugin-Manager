@@ -15,12 +15,12 @@ This project manages context menu plugins to extend functionality in various dir
 ## Installation
 1. Clone the repository:
     ```
-    git clone https://github.com/abdbbdii/abd_utils.git
+    git clone https://github.com/abdbbdii/context-menu-plugin-manager.git
     ```
 
 2. Go inside the repository:
     ```
-    cd abd_utils
+    cd context-menu-plugin-manager
     ```
 
 3. Create a virtual environment:
@@ -41,7 +41,7 @@ This project manages context menu plugins to extend functionality in various dir
     >   3. Enter a name for your new token and press Enter.
     >   4. Copy the token that is generated and replace **your_api_key** with your API key
     ```
-    echo API_KEY="your_api_key" > .env
+    echo FIGMA_API_KEY="your_api_key" > .env
     ```
 
 6. Run the program
@@ -88,7 +88,7 @@ This project manages context menu plugins to extend functionality in various dir
 - **Unpack Files From Folder:** Move files from subfolders to parent directories.
 
 ## License
-This project is licensed under the [BSD License](https://github.com/abdbbdii/abd_utils/blob/main/LICENSE).
+This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).
 
 ## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests to improve ABD Utils.

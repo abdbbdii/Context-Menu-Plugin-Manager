@@ -27,9 +27,7 @@ def driver(folders, params):
 
 
 cwd = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-print(cwd)
 load_dotenv(dotenv_path=os.path.join(cwd, ".env"))
-print(os.getenv("FIGMA_API"))
 
 
 def svg_to_pdf(svg_file1, svg_file2, pdf_file):
@@ -45,7 +43,7 @@ def svg_to_pdf(svg_file1, svg_file2, pdf_file):
 
 
 def get_file_from_figma(file_id, format):
-    response = requests.get(requests.get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": "0:1", "format": format}, headers={"X-Figma-Token": os.getenv("FIGMA_API")}).json()["images"]["0:1"])
+    response = requests.get(requests.get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": "0:1", "format": format}, headers={"X-Figma-Token": os.getenv("FIGMA_API_KEY")}).json()["images"]["0:1"])
     return response.content
 
 
