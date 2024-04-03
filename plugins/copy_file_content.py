@@ -1,5 +1,5 @@
 import os, pyperclip
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter as tk
 
 plugin_info = {
@@ -11,17 +11,20 @@ plugin_info = {
 
 
 def driver(folders, params):
-    content = {}
-    for folder in folders:
-        for file in os.listdir(folder):
-            if os.path.isfile(os.path.join(folder, file)):
-                with open(os.path.join(folder, file), "r") as f:
-                    content[file] = f.read()
-    res = filter_window(content.keys())
-    if res == {}:
-        return
-    backticks = "```" if res["wrap_in_backtick"] else ""
-    pyperclip.copy("\n\n".join([f"{file_name+'\n'+backticks}{file_name.rsplit('.')[-1] if res['enable_file_extension'] else ''}{'\n'+content[file_name].strip()+'\n'+backticks}" for file_name in res["selected_folders"]]))
+    try:
+        content = {}
+        for folder in folders:
+            for file in os.listdir(folder):
+                if os.path.isfile(os.path.join(folder, file)):
+                    with open(os.path.join(folder, file), "r") as f:
+                        content[file] = f.read()
+        res = filter_window(content.keys())
+        if res == {}:
+            return
+        backticks = "```" if res["wrap_in_backtick"] else ""
+        pyperclip.copy("\n\n".join([f"{file_name+'\n'+backticks}{file_name.rsplit('.')[-1] if res['enable_file_extension'] else ''}{'\n'+content[file_name].strip()+'\n'+backticks}" for file_name in res["selected_folders"]]))
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
 
 def filter_window(folders):
