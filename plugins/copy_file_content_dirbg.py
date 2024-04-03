@@ -17,7 +17,12 @@ def driver(folders, params):
             if os.path.isfile(os.path.join(folder, file)):
                 with open(os.path.join(folder, file), "r") as f:
                     content[file] = f.read()
-    pyperclip.copy("\n\n".join([f"{key}\n```\n{content[key].strip()}\n```" for key in filter_window(content.keys())]))
+    res = filter_window(content.keys())
+    print(res)
+    if res == {}:
+        return
+    backticks = "```" if res["wrap_in_backtick"] else ""
+    pyperclip.copy("\n\n".join([f"{file_name+'\n'+backticks}{file_name.rsplit('.')[-1] if res['enable_file_extension'] else ''}\n{content[file_name].strip()+'\n'+backticks}" for file_name in res["selected_folders"]]))
 
 
 def filter_window(folders):
@@ -48,29 +53,41 @@ def filter_window(folders):
             var.set(False)
         update_selection()
 
-    select_frame = ttk.Frame(root)
-    select_frame.pack(fill="x")
+    upper_frame = ttk.Frame(root)
+    upper_frame.pack(fill="x")
+    middle_frame = ttk.Frame(root)
+    middle_frame.pack(fill="both", expand=True)
+    bottom_frame = ttk.Frame(root)
+    bottom_frame.pack(fill="x")
 
-    ttk.Button(select_frame, text="Select All", command=select_all).pack(side="left", padx=10, pady=10)
-    ttk.Button(select_frame, text="Deselect All", command=deselect_all).pack(side="left", padx=10, pady=10)
+    ttk.Button(upper_frame, text="Select All", command=select_all).pack(side="left", padx=10, pady=10)
+    ttk.Button(upper_frame, text="Deselect All", command=deselect_all).pack(side="left", pady=10)
 
     folder_vars = []
     for folder in folders:
         var = tk.BooleanVar(value=True)
         folder_vars.append(var)
         folder_name = folder.split("/")[-1]
-        check_button = ttk.Checkbutton(root, text=folder_name, variable=var, command=update_selection)
+        check_button = ttk.Checkbutton(middle_frame, text=folder_name, variable=var, command=update_selection)
         check_button.pack(anchor="w", padx=10)
+    update_selection()
 
-    # Button to confirm selection
-    confirm_button = ttk.Button(root, text="Confirm", command=lambda: close_window(0))
-    confirm_button.pack(padx=10, pady=10)
+    enable_file_extension_check_var = tk.BooleanVar(value=True)
+    wrap_in_backtick_check_var = tk.BooleanVar(value=True)
+
+    ttk.Checkbutton(bottom_frame, text="Enable File Extension", variable=enable_file_extension_check_var).pack(padx=10, pady=10, side="left")
+    ttk.Checkbutton(bottom_frame, text="Wrap in Backtick", variable=wrap_in_backtick_check_var).pack(padx=10, pady=10, side="left")
+    ttk.Button(bottom_frame, text="Confirm", command=lambda: close_window(0)).pack(padx=10, pady=10, side="right")
 
     root.mainloop()
     if close_status == 0:
-        return selected_folders
+        return {
+            "selected_folders": selected_folders,
+            "enable_file_extension": enable_file_extension_check_var.get(),
+            "wrap_in_backtick": wrap_in_backtick_check_var.get(),
+        }
     else:
-        return []
+        return {}
 
 
 if __name__ == "__main__":
