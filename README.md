@@ -102,6 +102,7 @@ This project manages context menu plugins to extend functionality in various dir
 
 ## Example Plugins
 - **PDF ID Cards:** Generate PDFs for ID cards from Figma designs.
+- **Shop Menu Maker:** Create a menu for a shop from a json file.
 - **Remove Empty Folders:** Recursively remove empty folders within directories.
 - **Remove Extra Executables:** Delete redundant C/C++ executable files.
 - **Unpack Files From Folder:** Move files from subfolders to parent directories.

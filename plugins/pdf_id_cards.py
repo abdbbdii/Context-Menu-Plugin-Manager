@@ -73,11 +73,11 @@ def convert_rect_to_image(svg_file_path, image_file_path):
 def main(file_path):
     if not os.path.exists(os.path.join(file_path, "front.jpg")) or not os.path.exists(os.path.join(file_path, "back.jpg")):
         raise FileNotFoundError("front.jpg or back.jpg not found in the folder")
-    if not os.path.exists(os.path.join(cwd, "id_card_template.svg")):
+    if not os.path.exists(os.path.join(cwd, "svg_templates", "id_card_template.svg")):
         file = get_file_from_figma("mOlDFFrDYUrhUcqQFGPaVV", "svg")
-        open(os.path.join(cwd, "id_card_template.svg"), "wb").write(file)
+        open(os.path.join(cwd, "svg_templates", "id_card_template.svg"), "wb").write(file)
     else:
-        file = open(os.path.join(cwd, "id_card_template.svg"), "rb").read()
+        file = open(os.path.join(cwd, "svg_templates", "id_card_template.svg"), "rb").read()
     correctedSvg = {
         "front": convert_rect_to_image(BytesIO(file), os.path.join(file_path, "front.jpg")),
         "back": convert_rect_to_image(BytesIO(file), os.path.join(file_path, "back.jpg")),
