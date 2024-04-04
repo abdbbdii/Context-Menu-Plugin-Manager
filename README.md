@@ -13,6 +13,7 @@ This project manages context menu plugins to extend functionality in various dir
 - **Extensible:** Customize and extend functionality by creating new plugins.
 
 ## Installation
+First make sure you have Python 3.12.2 or above installed. If not, you can download it from [here](https://www.python.org/downloads/).
 1. Clone the repository:
     ```
     git clone https://github.com/abdbbdii/context-menu-plugin-manager.git
@@ -23,37 +24,24 @@ This project manages context menu plugins to extend functionality in various dir
     cd context-menu-plugin-manager
     ```
 
-3. Create a virtual environment:
-    ```
-    python3 -m venv env
-    ```
-    For Windows
-    ```
-    env\Scripts\activate
-    ```
-    For Linux
-    ```
-    env/bin/activate
-    ```
-
-4. Install the requirements
+3. Install the requirements
     ```
     pip3 install -r requirements.txt
     ```
 
-5. Specify your Figma API key (optional):
+4. Specify your Figma API key (optional):
     > **_NOTE:_** How to get your figma API key:
     >   1. From the file browser, click the account menu in the top-left corner and select Settings.
     >   2. Scroll to the Personal access tokens section.
     >   3. Enter a name for your new token and press Enter.
-    >   4. Copy the token that is generated and replace **your_api_key** with your FIGMA API key
+    >   4. Copy the token that is generated and replace **your_api_key** with your Figma API key
     ```
     echo FIGMA_API_KEY="your_api_key" > .env
     ```
 
-6. Run the program
+5. Run the program
     ```
-    python3 main.py
+    python main.py
     ```
 
 ## Warning
