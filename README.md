@@ -34,23 +34,22 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
     ```
 
 ## Creating a Plugin
-1. **Create Python Script**:
-    - Create a new Python script in the `plugins` directory.
-    - The script should contain the following structure:
-    ```python
-    plugin_info = {
-        "title": str,
-        "description": str,
-        "type": ["FILELOC", "FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE"],
-        "manu_name": str,
-    }
+### **Create Python Script**:
+- Create a new Python script in the `plugins` directory.
+- The script should contain the following structure:
+```python
+plugin_info = {
+    "title": str,
+    "description": str,
+    "type": ["FILELOC", "FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE"],
+    "manu_name": str,
+}
 
+def driver(folders, params):
+    ...
+```
 
-    def driver(folders, params):
-        ...
-    ```
-
-2. **Define Metadata**:<br>
+### **`plugin_info` dictionary**:<br>
    Define a variable named `plugin_info` containing the following keys.
    - `title` is the name of the script that is desplayed as an item in context menu.
    - `description` (optional) is the description of the script.
@@ -58,16 +57,16 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
    - `type` is the type of the plugin. It can be one or more of:
      - `DIRECTORY` for opening on a directory.
       - `DIRECTORY_BACKGROUND` for opening on the background of the directory.
-      - `DRIVE` for opening on the drives(think USBs).
+      - `DRIVE` for opening on the drives like USB drive.
       - `FILES` for opening on a file.
-3. **Implement Functionality**:<br>
+### **`driver` function**:<br>
    Implement the `driver` function and pass two parameters:
    - `folders` (selected directories)
    - `params` (additional parameters).
 4. **Run the Project**:
     - Run `main.py` to load and manage plugins.
     - Test your plugin by right-clicking on an empty space within a folder.
-## Example:
+### Example:
    ```python
     plugin_info = {
         "title": "My Plugin Title",
