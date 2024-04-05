@@ -34,10 +34,6 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
     python main.py
     ```
 
-## Warning
-   - **Folder Relocation or Renaming**: If you move the project folder to a different location or rename it, you'll need to rerun `main.py`. Else the options will no longer work.
-   - **Figma API Key**: The Figma API key is optional. If you choose to use it, ensure that you keep it secure. It's required to download up-to-date template for PDF ID Cards Example plugin.
-
 ## Creating a Plugin
 1. **Create Python Script**:
     - Create a new Python script in the `plugins` directory.
