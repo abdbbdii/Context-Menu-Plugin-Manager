@@ -5,3 +5,6 @@ __pycache__
 .env
 record.json
 test.json
+ABD_Utils_*
+.git
+.gitignore

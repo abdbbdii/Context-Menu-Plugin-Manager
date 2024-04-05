@@ -29,17 +29,7 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
     pip3 install -r requirements.txt
     ```
 
-4. Specify your Figma API key (optional):
-    > **_NOTE:_** How to get your figma API key:
-    >   1. From the file browser, click the account menu in the top-left corner and select Settings.
-    >   2. Scroll to the Personal access tokens section.
-    >   3. Enter a name for your new token and press Enter.
-    >   4. Copy the token that is generated and replace **your_api_key** with your Figma API key
-    ```
-    echo FIGMA_API_KEY="your_api_key" > .env
-    ```
-
-5. Run the program
+4. Run the program
     ```
     python main.py
     ```
@@ -89,12 +79,10 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
     - Test your plugin by right-clicking on an empty space within a folder.
 
 ## Example Plugins
-- **PDF ID Cards:** Generate PDFs for ID cards from Figma designs.
-- **Shop Menu Maker:** Create a menu for a shop from a json file.
 - **Remove Empty Folders:** Recursively remove empty folders within directories.
-- **Remove Extra Executables:** Delete redundant C/C++ executable files.
 - **Unpack Files From Folder:** Move files from subfolders to parent directories.
 - **Copy File Content:** Copy the content of all files in the current directory to the clipboard.
+- *For more plugins, see my other [plugins](https://github.com/abdbbdii/plugins)*.
 
 ## License
 This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).

@@ -5,7 +5,7 @@ plugin_info = {
     "title": "Unpack Files From Folder",
     "description": "Unpack all files in the selected folder(s) to the parent folder(s)",
     "type": ["DIRECTORY"],
-    "manu_name": "abd Utils",
+    "manu_name": "Plugin Manager",
 }
 
 

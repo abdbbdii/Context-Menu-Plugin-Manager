@@ -7,7 +7,7 @@ plugin_info = {
     "title": "Remove Empty Folders",
     "description": "Remove empty folders from the selected folder(s)",
     "type": ["DIRECTORY_BACKGROUND", "DIRECTORY"],
-    "manu_name": "abd Utils",
+    "manu_name": "Plugin Manager",
 }
 
 

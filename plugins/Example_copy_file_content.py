@@ -6,7 +6,7 @@ plugin_info = {
     "title": "Copy File Content",
     "description": "Copy the content of all files in the current directory to the clipboard.",
     "type": ["DIRECTORY_BACKGROUND"],
-    "manu_name": "abd Utils",
+    "manu_name": "Plugin Manager",
 }
 
 
