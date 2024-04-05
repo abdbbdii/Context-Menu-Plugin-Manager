@@ -4,8 +4,7 @@ This project manages context menu plugins to extend functionality in various dir
 
 ## Usage
 1. Place plugin scripts in the `plugins` directory.
-2. Modify plugins according to the provided template.
-3. Run `main.py` to manage and load plugins.
+2. Run `main.py` to manage and load plugins.
 
 ## Features
 - **Plugin Development:** Easily create plugins with metadata and functionality.
