@@ -91,7 +91,7 @@ def driver(folders, params):
 - **Remove Empty Folders:** Recursively remove empty folders within directories.
 - **Unpack Files From Folder:** Move files from subfolders to parent directories.
 - **Copy File Content:** Copy the content of all files in the current directory to the clipboard.
-- *For more plugins, see my other [plugins](https://github.com/abdbbdii/plugins)*.
+- *For more examples, see my other [plugins](https://github.com/abdbbdii/plugins)*.
 
 ## License
 This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).
