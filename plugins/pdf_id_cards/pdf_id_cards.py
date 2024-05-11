@@ -30,6 +30,7 @@ def driver(folders, params):
 
 ROOT = Path(__file__).parent.parent.parent
 load_dotenv(dotenv_path=ROOT / ".env")
+TEMPLATE_PATH = ROOT / "assets" / "templates"
 
 
 def svg_to_pdf(svg_files, output_file_path):
@@ -76,11 +77,11 @@ def main(file_path):
     CWD = Path(file_path)
     if not (CWD / "front.jpg").exists() or not (CWD / "back.jpg").exists():
         raise FileNotFoundError("front.jpg or back.jpg not found in the folder")
-    if not (ROOT / "svg_templates" / "id_card_template.svg").exists():
+    if not (TEMPLATE_PATH / "id_card_template.svg").exists():
         file = get_file_from_figma("mOlDFFrDYUrhUcqQFGPaVV", "svg")
-        open(ROOT / "svg_templates" / "id_card_template.svg", "wb").write(file)
+        open(TEMPLATE_PATH / "id_card_template.svg", "wb").write(file)
     else:
-        file = open(ROOT / "svg_templates" / "id_card_template.svg", "rb").read()
+        file = open(TEMPLATE_PATH / "id_card_template.svg", "rb").read()
     correctedSvg = {
         "front": convert_rect_to_image(BytesIO(file), CWD / "front.jpg"),
         "back": convert_rect_to_image(BytesIO(file), CWD / "back.jpg"),

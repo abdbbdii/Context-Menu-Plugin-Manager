@@ -3,9 +3,8 @@ from os import startfile, getenv
 import json
 from dotenv import load_dotenv
 from io import BytesIO
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import messagebox
 from pathlib import Path
-
 from svglib.svglib import svg2rlg
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -29,6 +28,7 @@ def driver(files, params):
 
 ROOT = Path(__file__).parent.parent.parent
 load_dotenv(dotenv_path=ROOT / ".env")
+TEMPLATE_PATH = ROOT / "assets" / "templates"
 
 
 def get_file_from_figma(file_id, format, frame="0:1"):
@@ -54,21 +54,21 @@ def main(file_path):
     CWD = Path(file_path).parent
 
     for key, value in figma_file_ids.items():
-        if not Path(ROOT / "svg_templates" / f"shop_menu_template_{key}.svg").exists():
+        if not Path(TEMPLATE_PATH / f"shop_menu_template_{key}.svg").exists():
             file = get_file_from_figma(value, "svg")
-            open(ROOT / "svg_templates" / f"shop_menu_template_{key}.svg", "wb").write(file)
+            open(TEMPLATE_PATH / f"shop_menu_template_{key}.svg", "wb").write(file)
     for key in figma_file_ids.keys():
-        file = open(ROOT / "svg_templates" / f"shop_menu_template_{key}.svg", "rb").read()
+        file = open(TEMPLATE_PATH / f"shop_menu_template_{key}.svg", "rb").read()
         for key_, value in json_file.items():
             file = file.decode().replace(key_, str(value) if value else "").encode()
         svg_to_pdf([file], CWD / f"shop_menu_{key}.pdf")
         startfile(CWD / f"shop_menu_{key}.pdf")
 
     # doing for flex
-    if not Path(ROOT / "svg_templates" / f"shop_menu_template_flex.svg").exists():
+    if not Path(TEMPLATE_PATH / f"shop_menu_template_flex.svg").exists():
         flex_file = get_file_from_figma("5zRMQEXHL0SMV1rDZuRCWK", "svg")
-        open(ROOT / "svg_templates" / f"shop_menu_template_flex.svg", "wb").write(flex_file)
-    flex_file = open(ROOT / "svg_templates" / f"shop_menu_template_flex.svg", "rb").read()
+        open(TEMPLATE_PATH / f"shop_menu_template_flex.svg", "wb").write(flex_file)
+    flex_file = open(TEMPLATE_PATH / f"shop_menu_template_flex.svg", "rb").read()
 
     data = []
     files = []
