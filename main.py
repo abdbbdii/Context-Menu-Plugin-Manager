@@ -7,6 +7,7 @@ from openai import OpenAI, OpenAIError
 import json
 from send2trash import send2trash
 
+
 class Component:
     def Button(text, on_click):
         return ft.FilledButton(text, on_click=on_click, style=ft.ButtonStyle(bgcolor="#3502c9", color="white", padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)), height=30)
@@ -30,12 +31,11 @@ all_installed = False
 while not all_installed:
     try:
         pm = PluginManager()
-        selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
     except ModuleNotFoundError as e:
         system("pip install " + str(e).split("'")[1])
     else:
         all_installed = True
-
+selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
 
 
 def main(page: ft.Page):
@@ -113,7 +113,6 @@ def main(page: ft.Page):
 
             comp = OpenAI()
             comp.api_key = getenv("OPENAI_API_KEY")
-            print(getenv("OPENAI_API_KEY"))
             try:
                 res: dict = json.loads(
                     comp.chat.completions.create(
@@ -128,8 +127,8 @@ def main(page: ft.Page):
                     .message.content
                 )
 
-            except OpenAIError as exeption:
-                exeption = exeption.__dict__
+            except OpenAIError as exception:
+                exception = exception.__dict__
 
                 def on_open_page(e):
                     dlg.open = False
@@ -145,11 +144,11 @@ def main(page: ft.Page):
                     e.control.page.update()
                     enter_api_key(e)
 
-                dlg = Component.dlg_ask_input_btn(exeption["code"], exeption["body"]["message"], {"Cancel": on_cancel, "Open Page": on_open_page, "Enter API Key Again": on_enter_api_key})
-                e.control.page.dialog = dlg
-                e.control.page.update()
-                return
-
+                if exception.get("code") == 401:
+                    dlg = Component.dlg_ask_input_btn(exception["code"], exception["body"]["message"], {"Cancel": on_cancel, "Open Page": on_open_page, "Enter API Key Again": on_enter_api_key})
+                    e.control.page.dialog = dlg
+                    e.control.page.update()
+                    return
             try:
                 parent = PLUGINS_DIR / str(res["plugin_file_name"].rstrip(".py"))
                 mkdir(parent)
@@ -165,18 +164,19 @@ def main(page: ft.Page):
                     pm.plugins.append(loaded)
                     loaded.enable_plugin()
                     make_plugin_list()
+                else:
+                    generate_btn_click(e, user_input=f"The previous response was {str(res)} I want you to generate again but it should only conatain what system specified.\nHere is the promt again:\n{latest_user_input}")
             except SyntaxError:
                 generate_btn_click(e, user_input=f"SyntaxError: The previous response was {str(res)} I want you to generate again using with corrent syntax.\nHere is the promt again:\n{latest_user_input}")
-                return
-
-            else:
-                generate_btn_click(e, user_input=f"The previous response was {str(res)} I want you to generate again but it should only conatain what system specified.\nHere is the promt again:\n{latest_user_input}")
                 return
 
         def on_cancel(e):
             dlg_modal.open = False
             e.control.page.update()
 
+        if user_input:
+            on_ok(e)
+            return
         dlg_modal = Component.dlg_ask_input_btn("Generate Plugin", "What do you want to generate?", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=10)
         e.control.page.dialog = dlg_modal
         e.control.page.update()
@@ -238,11 +238,10 @@ def main(page: ft.Page):
             )
             plugin_switch.on_change = on_switch_change_closure(plugin, plugin_switch)
             plugin_list.controls = plugins
-            plugin_list.scroll = True
             plugin_list.update()
 
     page.title = "Flet counter example"
-    page.fonts = {"Inter": "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bslnt,wght%5D.ttf"}
+    page.fonts = {"Inter": "Inter[slnt,wght].ttf"}
 
     page.theme = ft.Theme(font_family="Inter")
     page.padding = 0
@@ -262,7 +261,12 @@ def main(page: ft.Page):
                             ft.Row(
                                 [
                                     ft.Text("Plugins", color="white", size=18, weight=ft.FontWeight.W_700),
-                                    enable_disable_all_btn := Component.Button("Disable All" if pm.isAllPluginEnabled() else "Enable All", enable_disable_all_btn_click),
+                                    ft.Row(
+                                        [
+                                            ft.IconButton(ft.icons.REFRESH, on_click=lambda e: make_plugin_list()),
+                                            enable_disable_all_btn := Component.Button("Disable All" if pm.isAllPluginEnabled() else "Enable All", enable_disable_all_btn_click),
+                                        ],
+                                    ),
                                 ],
                                 height=80,
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -272,11 +276,11 @@ def main(page: ft.Page):
                                 scroll=True,
                                 spacing=10,
                             ),
-                        ]
+                        ],
                     ),
                     bgcolor="#1d1c44",
                     padding=20,
-                    width=300,
+                    width=350,
                     border_radius=ft.border_radius.BorderRadius(0, 20, 0, 20),
                     alignment=ft.alignment.top_left,
                 ),
@@ -319,12 +323,11 @@ def main(page: ft.Page):
                                                             Component.Button("View in Explorer", lambda e: system(f'explorer.exe "{selected_plugin.parent}"')),
                                                             Component.Button("Open in Code", lambda e: system(f'code "{selected_plugin.path}"')),
                                                         ],
-                                                        scroll=True,
                                                     ),
                                                 ],
                                                 spacing=10,
                                             ),
-                                        ]
+                                        ],
                                     ),
                                     ft.Divider(thickness=2, color="#242458"),
                                     plugin_markdown := ft.Markdown(
@@ -332,9 +335,9 @@ def main(page: ft.Page):
                                         expand=True,
                                         extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
                                     ),
-                                ]
+                                ],
                             ),
-                        ]
+                        ],
                     ),
                     expand=True,
                     padding=20,

@@ -78,6 +78,19 @@
         "enable": true
     },
     {
+        "file_name": "test_plugin.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\test_plugin",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\test_plugin\\test_plugin.py",
+        "menu_name": "abd Utils",
+        "supported_type": {
+            "DIRECTORY": true,
+            "DIRECTORY_BACKGROUND": true,
+            "DRIVE": false,
+            "FILES": false
+        },
+        "enable": true
+    },
+    {
         "file_name": "unpack_files.py",
         "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\unpack_files",
         "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\unpack_files\\unpack_files.py",

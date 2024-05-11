@@ -17,31 +17,48 @@ dotenv.load_dotenv(DOT_ENV)
 
 class Plugin:
 
-    def __init__(self, file_name, parent, module):
-        self.file_name = Path(file_name)
-        self.parent = Path(parent)
-        self.path = PLUGINS_DIR / parent / Path(file_name)
-        self.driver = module.driver
-        self.title = module.plugin_info["title"]
-        self.icon = self.parent / "icon.ico" if "icon.ico" in listdir(PLUGINS_DIR / str(self.parent)) else ASSETS_DIR / "favicon.ico"
-        self.markdown = self.parent / "README.md" if "README.md" in listdir(PLUGINS_DIR / str(self.parent)) else ASSETS_DIR / "README.md"
-        self.description = module.plugin_info["description"]
-        self.menu_name = module.plugin_info["menu_name"]
-        self.supported_type = {key: key in module.plugin_info["type"] for key in plugin_types}
-        self.enable = False
+    def __init__(self, file_name=None, parent=None, path=None, driver=None, title=None, icon=None, markdown=None, description=None, menu_name=None, supported_type=None, enable=None):
+        self.file_name = file_name
+        self.parent = parent
+        self.path = path
+        self.driver = driver
+        self.title = title
+        self.icon = icon
+        self.markdown = markdown
+        self.description = description
+        self.menu_name = menu_name
+        self.supported_type = supported_type
+        self.enable = enable
 
-    def make(self, recorded_plugin):
-        self.file_name = Path(recorded_plugin["file_name"])
-        self.parent = Path(recorded_plugin["parent"])
-        self.path = Path(recorded_plugin["path"])
-        self.menu_name = recorded_plugin["menu_name"]
-        self.supported_type = recorded_plugin["supported_type"]
-        self.enable = recorded_plugin["enable"]
-        self.driver = None
-        self.title = None
-        self.icon = None
-        self.markdown = None
-        self.description = None
+    def construct_from_module(file_name, parent, module):
+        return Plugin(
+            file_name=file_name,
+            parent=parent,
+            path=PLUGINS_DIR / parent / Path(file_name),
+            driver=module.driver,
+            title=module.plugin_info["title"],
+            icon=parent / "icon.ico" if "icon.ico" in listdir(PLUGINS_DIR / str(parent)) else ASSETS_DIR / "favicon.ico",
+            markdown=parent / "README.md" if "README.md" in listdir(PLUGINS_DIR / str(parent)) else ASSETS_DIR / "README.md",
+            description=module.plugin_info["description"],
+            menu_name=module.plugin_info["menu_name"],
+            supported_type={key: key in module.plugin_info["type"] for key in plugin_types},
+            enable=False,
+        )
+
+    def construct_from_dictionary(recorded_plugin):
+        return Plugin(
+            file_name=recorded_plugin["file_name"],
+            parent=recorded_plugin["parent"],
+            path=recorded_plugin["path"],
+            driver=None,
+            title=None,
+            icon=None,
+            markdown=None,
+            description=None,
+            menu_name=recorded_plugin["menu_name"],
+            supported_type=recorded_plugin["supported_type"],
+            enable=recorded_plugin["enable"],
+        )
 
     def enable_plugin(self):
         for type in self.supported_type:
@@ -83,7 +100,7 @@ class PluginManager:
                 module = module_from_spec(spec)
                 spec.loader.exec_module(module)
                 if hasattr(module, "plugin_info") and hasattr(module, "driver"):
-                    temp.append(Plugin(file, dir_path, module))
+                    temp.append(Plugin.construct_from_module(file, dir_path, module))
         if len(temp) == 1:
             if dir_path.parent != PLUGINS_DIR:
                 move(dir_path, PLUGINS_DIR)
@@ -103,10 +120,12 @@ class PluginManager:
     def disable_all_plugins(self):
         for plugin in self.plugins:
             plugin.disable_plugin()
+        print("Disabled all plugins")
 
     def enable_all_plugins(self):
         for plugin in self.plugins:
             plugin.enable_plugin()
+        print("Enabled all plugins")
 
     def refresh_context_menu_plugins(self):
         for plugin in self.plugins:
@@ -145,9 +164,9 @@ class PluginManager:
                 if temp := self.getPugin(Path(plugin["path"])):
                     temp.enable = plugin["enable"]
                 else:
-                    Plugin.make(plugin).disable_plugin()
-                    self.refresh_context_menu_plugins()
+                    Plugin.construct_from_dictionary(recorded_plugin=plugin).disable_plugin()
 
+        self.refresh_context_menu_plugins()
         print("Loaded session")
 
     def isAllPluginEnabled(self):
