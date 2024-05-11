@@ -15,13 +15,14 @@ class Component:
         return ft.AlertDialog(
             modal=True,
             title=ft.Text(title),
-            content=ft.Text(content) if is_ask else ft.TextField(label=content, multiline=True, max_lines=max_lines, expand=True, border_color="#9ecaff", border_width=2),
+            content=ft.Text(content) if is_ask else ft.TextField(label=content, multiline=True, max_lines=max_lines, expand=True, border_color="#9ecaff", border_width=2, autofocus=True, width=500),
             actions=[
                 *[ft.TextButton(text, on_click=on_click, style=ft.ButtonStyle(color="white")) for text, on_click in options.items()],
             ],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#1d1c44",
             open=True,
+            shape=ft.RoundedRectangleBorder(radius=10),
         )
 
 
@@ -71,6 +72,7 @@ def main(page: ft.Page):
             e.control.page.update()
             if selected_plugin.enable:
                 selected_plugin.disable_plugin()
+                pm.refresh_context_menu_plugins()
             pm.plugins.remove(selected_plugin)
             send2trash(selected_plugin.parent)
             make_plugin_list()
@@ -95,7 +97,7 @@ def main(page: ft.Page):
             dotenv.load_dotenv(DOT_ENV)
             generate_btn_click(e, user_input)
 
-        dlg_modal = Component.dlg_ask_input_btn("Enter OpenAI API Key", "type here", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=1)
+        dlg_modal = Component.dlg_ask_input_btn("Enter OpenAI API Key", "Type here", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=1)
         e.control.page.dialog = dlg_modal
         e.control.page.update()
 
@@ -158,10 +160,14 @@ def main(page: ft.Page):
                 generate_btn_click(e, user_input=f"The previous response was {str(res)} I want you to generate again using {{'plugin_content': ,'plugin_file_name': ,'detailed_plugin_description_in_markdown_format': ,'markdown_file_name': }}\nHere is the promt again:\n{latest_user_input}")
                 return
 
-            if loaded := pm.loadPlugin(parent):
-                pm.plugins.append(loaded)
-                loaded.enable_plugin()
-                make_plugin_list()
+            try:
+                if loaded := pm.loadPlugin(parent):
+                    pm.plugins.append(loaded)
+                    loaded.enable_plugin()
+                    make_plugin_list()
+            except SyntaxError:
+                generate_btn_click(e, user_input=f"SyntaxError: The previous response was {str(res)} I want you to generate again using with corrent syntax.\nHere is the promt again:\n{latest_user_input}")
+                return
 
             else:
                 generate_btn_click(e, user_input=f"The previous response was {str(res)} I want you to generate again but it should only conatain what system specified.\nHere is the promt again:\n{latest_user_input}")
@@ -171,7 +177,7 @@ def main(page: ft.Page):
             dlg_modal.open = False
             e.control.page.update()
 
-        dlg_modal = Component.dlg_ask_input_btn("Type what will the plugin do?", "Type here", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=10)
+        dlg_modal = Component.dlg_ask_input_btn("Generate Plugin", "What do you want to generate?", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=10)
         e.control.page.dialog = dlg_modal
         e.control.page.update()
 
@@ -198,6 +204,7 @@ def main(page: ft.Page):
             plugin.enable_plugin()
         else:
             plugin.disable_plugin()
+            pm.refresh_context_menu_plugins()
 
         pm.saveSession()
         enable_disable_all_btn.text = "Disable All" if pm.isAllPluginEnabled() else "Enable All"
@@ -231,6 +238,7 @@ def main(page: ft.Page):
             )
             plugin_switch.on_change = on_switch_change_closure(plugin, plugin_switch)
             plugin_list.controls = plugins
+            plugin_list.scroll = True
             plugin_list.update()
 
     page.title = "Flet counter example"

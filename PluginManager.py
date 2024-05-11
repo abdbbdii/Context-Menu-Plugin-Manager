@@ -14,6 +14,7 @@ plugin_types = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES"]
 
 dotenv.load_dotenv(DOT_ENV)
 
+
 class Plugin:
 
     def __init__(self, file_name, parent, module):
@@ -29,18 +30,30 @@ class Plugin:
         self.supported_type = {key: key in module.plugin_info["type"] for key in plugin_types}
         self.enable = False
 
+    def make(self, recorded_plugin):
+        self.file_name = Path(recorded_plugin["file_name"])
+        self.parent = Path(recorded_plugin["parent"])
+        self.path = Path(recorded_plugin["path"])
+        self.menu_name = recorded_plugin["menu_name"]
+        self.supported_type = recorded_plugin["supported_type"]
+        self.enable = recorded_plugin["enable"]
+        self.driver = None
+        self.title = None
+        self.icon = None
+        self.markdown = None
+        self.description = None
+
     def enable_plugin(self):
         for type in self.supported_type:
-            if self.supported_type[type] and not self.enable:
-                print("[ADDING]", type, self.title, "in", self.menu_name)
-                menu = menus.ContextMenu(self.menu_name, type)
-                menu.add_items([menus.ContextCommand(self.title, icon_path=str(self.icon), python=self.driver)])
-                menu.compile()
+            print("[ADDING]", type, self.title, "in", self.menu_name)
+            menu = menus.ContextMenu(self.menu_name, type)
+            menu.add_items([menus.ContextCommand(self.title, icon_path=str(self.icon), python=self.driver)])
+            menu.compile()
         self.enable = True
 
     def disable_plugin(self):
         for type, supported in self.supported_type.items():
-            if supported and self.enable:
+            if supported:
                 print("[REMOVING]", type, self.title, "from", self.menu_name)
                 try:
                     menus.removeMenu(self.menu_name, type)
@@ -95,6 +108,17 @@ class PluginManager:
         for plugin in self.plugins:
             plugin.enable_plugin()
 
+    def refresh_context_menu_plugins(self):
+        for plugin in self.plugins:
+            if not plugin.enable:
+                plugin.disable_plugin()
+
+        for plugin in self.plugins:
+            if plugin.enable:
+                plugin.enable_plugin()
+        print("Re-enabled plugins")
+
+
     def saveSession(self):
         with open("record.json", "w") as f:
             json.dump(
@@ -120,7 +144,12 @@ class PluginManager:
             for plugin in json.load(f):
                 if temp := self.getPugin(Path(plugin["path"])):
                     temp.enable = plugin["enable"]
+                else:
+                    Plugin.make(plugin).disable_plugin()
+                    self.refresh_context_menu_plugins()
+
         print("Loaded session")
 
     def isAllPluginEnabled(self):
         return all([plugin.enable for plugin in self.plugins])
+
