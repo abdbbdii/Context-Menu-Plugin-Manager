@@ -1,8 +1,8 @@
 [
     {
         "file_name": "copy_batch_file_content.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\copy_batch_file_content",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\copy_batch_file_content\\copy_batch_file_content.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\copy_batch_file_content",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\copy_batch_file_content\\copy_batch_file_content.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": false,
@@ -14,21 +14,8 @@
     },
     {
         "file_name": "git_clone.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\git_clone",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\git_clone\\git_clone.py",
-        "menu_name": "abd Utils",
-        "supported_type": {
-            "DIRECTORY": false,
-            "DIRECTORY_BACKGROUND": true,
-            "DRIVE": false,
-            "FILES": false
-        },
-        "enable": true
-    },
-    {
-        "file_name": "lets_dance.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\lets_dance",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\lets_dance\\lets_dance.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\git_clone",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\git_clone\\git_clone.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": false,
@@ -40,8 +27,8 @@
     },
     {
         "file_name": "pdf_id_cards.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\pdf_id_cards",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\pdf_id_cards\\pdf_id_cards.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\pdf_id_cards",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\pdf_id_cards\\pdf_id_cards.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": false,
@@ -53,8 +40,8 @@
     },
     {
         "file_name": "remove_empty_folders.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\remove_empty_folders",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\remove_empty_folders\\remove_empty_folders.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\remove_empty_folders",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\remove_empty_folders\\remove_empty_folders.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": true,
@@ -66,8 +53,8 @@
     },
     {
         "file_name": "remove_extra_exe.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\remove_extra_exe",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\remove_extra_exe\\remove_extra_exe.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\remove_extra_exe",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\remove_extra_exe\\remove_extra_exe.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": true,
@@ -79,8 +66,8 @@
     },
     {
         "file_name": "shop_menu_maker.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\shop_menu_maker",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\shop_menu_maker\\shop_menu_maker.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\shop_menu_maker",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\shop_menu_maker\\shop_menu_maker.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": false,
@@ -92,8 +79,8 @@
     },
     {
         "file_name": "unpack_files.py",
-        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\unpack_files",
-        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager-private - Copy\\plugins\\unpack_files\\unpack_files.py",
+        "parent": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\unpack_files",
+        "path": "c:\\Users\\ar69k\\OneDrive - student.uet.edu.pk\\Documents\\abd_codespace\\Python Programs\\context-menu-plugin-manager\\plugins\\unpack_files\\unpack_files.py",
         "menu_name": "abd Utils",
         "supported_type": {
             "DIRECTORY": true,

@@ -7,10 +7,6 @@ from openai import OpenAI, OpenAIError
 import json
 from send2trash import send2trash
 
-pm = PluginManager()
-selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
-
-
 class Component:
     def Button(text, on_click):
         return ft.FilledButton(text, on_click=on_click, style=ft.ButtonStyle(bgcolor="#3502c9", color="white", padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)), height=30)
@@ -27,6 +23,18 @@ class Component:
             bgcolor="#1d1c44",
             open=True,
         )
+
+
+all_installed = False
+while not all_installed:
+    try:
+        pm = PluginManager()
+        selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
+    except ModuleNotFoundError as e:
+        system("pip install " + str(e).split("'")[1])
+    else:
+        all_installed = True
+
 
 
 def main(page: ft.Page):

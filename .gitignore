@@ -5,3 +5,4 @@ __pycache__
 .vs
 .vscode
 .git
+record.json
