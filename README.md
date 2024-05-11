@@ -1,5 +1,7 @@
 # Context Menu Plugin Manager
 
+![alt text](<assets/mockup (2).png>)
+
 This project manages context menu plugins to extend functionality in various directories. It allows dynamic addition and removal of context menu items using Python scripts.
 
 ## Usage

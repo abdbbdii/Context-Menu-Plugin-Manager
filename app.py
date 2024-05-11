@@ -246,8 +246,8 @@ def main(page: ft.Page):
     page.theme = ft.Theme(font_family="Inter")
     page.padding = 0
     page.bgcolor = "#151635"
-    page.window_height = 713
-    page.window_width = 1020
+    page.window_height = 840
+    page.window_width = 1440
     page.window_min_height = 713
     page.window_min_width = 1020
     page.on_close = lambda e: pm.saveSession()
