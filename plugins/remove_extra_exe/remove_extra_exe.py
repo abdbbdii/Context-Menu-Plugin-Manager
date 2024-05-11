@@ -1,31 +1,33 @@
-import os, pyperclip
-from tkinter import ttk, messagebox
+from tkinter import messagebox
+import os
+from send2trash import send2trash
+from tkinter import ttk
 import tkinter as tk
 
 plugin_info = {
-    "title": "Copy Batch File Content",
-    "description": "Copy the content of all files in the current directory to the clipboard.",
-    "type": ["DIRECTORY_BACKGROUND"],
+    "title": "Remove Extra Executables",
+    "description": "Remove extra C/C++ executables from the selected folder(s)",
+    "type": ["DIRECTORY_BACKGROUND", "DIRECTORY"],
     "menu_name": "abd Utils",
 }
 
 
 def driver(folders, params):
     try:
-        content = {}
+        dict_of_files = {}
+        allowed = ["cpp", "c"]
         for folder in folders:
-            for file in os.listdir(folder):
-                if os.path.isfile(os.path.join(folder, file)):
-                    with open(os.path.join(folder, file), "r") as f:
-                        content[file] = f.read()
-        res = filter_window(content.keys())
-        if res == {}:
-            return
-        backticks = "```" if res["wrap_in_backtick"] else ""
-        pyperclip.copy("\n\n".join([f"{file_name+'\n'+backticks}{file_name.rsplit('.')[-1] if res['enable_file_extension'] else ''}{'\n'+content[file_name].strip()+'\n'+backticks}" for file_name in res["selected_folders"]]))
+            for root, _, files in os.walk(folder):
+                for file in files:
+                    if file.split(".")[-1] in allowed and os.path.exists(os.path.join(root, file.split(".")[0] + ".exe")):
+                        dict_of_files[os.path.join(root, file.split(".")[0] + ".exe")] = file.split(".")[0] + ".exe"
+        if dict_of_files == {}:
+            messagebox.showinfo("No files to remove", "No files to remove")
+        else:
+            for file in filter_window(dict_of_files.keys()):
+                send2trash(file)
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
 
 def filter_window(folders):
     def close_window(status_code):
@@ -74,23 +76,10 @@ def filter_window(folders):
         check_button.pack(anchor="w", padx=10)
     update_selection()
 
-    enable_file_extension_check_var = tk.BooleanVar(value=True)
-    wrap_in_backtick_check_var = tk.BooleanVar(value=True)
-
-    ttk.Checkbutton(bottom_frame, text="Enable File Extension", variable=enable_file_extension_check_var).pack(padx=10, pady=10, side="left")
-    ttk.Checkbutton(bottom_frame, text="Wrap in Backtick", variable=wrap_in_backtick_check_var).pack(padx=10, pady=10, side="left")
     ttk.Button(bottom_frame, text="Confirm", command=lambda: close_window(0)).pack(padx=10, pady=10, side="right")
 
     root.mainloop()
     if close_status == 0:
-        return {
-            "selected_folders": selected_folders,
-            "enable_file_extension": enable_file_extension_check_var.get(),
-            "wrap_in_backtick": wrap_in_backtick_check_var.get(),
-        }
+        return selected_folders
     else:
-        return {}
-
-
-if __name__ == "__main__":
-    driver(["."], {})
+        return []

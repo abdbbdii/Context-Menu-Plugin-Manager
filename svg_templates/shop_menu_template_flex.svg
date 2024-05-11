@@ -1,0 +1,26 @@
+<svg width="595" height="842" viewBox="0 0 595 842" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="595" height="842" fill="white"/>
+<g clip-path="url(#clip0_0_1)">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Arial" font-size="240" letter-spacing="0em"><tspan x="97" y="289.203">:01</tspan></text>
+</g>
+<rect x="73" y="99" width="449" height="215" stroke="black"/>
+<g clip-path="url(#clip1_0_1)">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Arial" font-size="240" letter-spacing="0em"><tspan x="97" y="504.203">:02</tspan></text>
+</g>
+<rect x="73" y="314" width="449" height="215" stroke="black"/>
+<g clip-path="url(#clip2_0_1)">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Arial" font-size="240" letter-spacing="0em"><tspan x="97" y="719.203">:03</tspan></text>
+</g>
+<rect x="73" y="529" width="449" height="215" stroke="black"/>
+<defs>
+<clipPath id="clip0_0_1">
+<rect x="73" y="99" width="449" height="215" fill="white"/>
+</clipPath>
+<clipPath id="clip1_0_1">
+<rect x="73" y="314" width="449" height="215" fill="white"/>
+</clipPath>
+<clipPath id="clip2_0_1">
+<rect x="73" y="529" width="449" height="215" fill="white"/>
+</clipPath>
+</defs>
+</svg>

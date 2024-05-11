@@ -7,7 +7,7 @@ plugin_info = {
     "title": "Paste Git Repository Here",
     "description": "Clone a git repository",
     "type": ["DIRECTORY_BACKGROUND"],
-    "manu_name": "abd Utils",
+    "menu_name": "abd Utils",
 }
 
 def driver(folders, params):

@@ -1,10 +1,7 @@
-test_gen.py
-env
 __pycache__
-.vscode
 .env
-record.json
-test.json
-ABD_Utils_*
-.git
+.venv
 .gitignore
+.vs
+.vscode
+.git

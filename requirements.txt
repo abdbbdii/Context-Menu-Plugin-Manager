@@ -1,3 +1,7 @@
+context-menu==1.3.1
+python-dotenv==1.0.1
+reportlab==4.1.0
 requests==2.31.0
 Send2Trash==1.8.2
+svglib==1.5.1
 pyperclip==1.8.2

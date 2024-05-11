@@ -38,11 +38,12 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
 ### **Create Python Script**:
 - Create a new Python script in the `plugins` directory.
 - The script should contain the following structure:
+
 ```python
 plugin_info = {
     "title": str,
     "description": str,
-    "manu_name": str,
+    "menu_name": str,
     "type": ["FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE"],
 }
 
@@ -52,7 +53,7 @@ def driver(folders, params):
 
 ### **`plugin_info` variable**:
 Define a variable named `plugin_info` containing the following keys.
-  - `title` is the name of the script that is desplayed as an item in context menu.
+  - `title` is the name of the script that is displayed as an item in context menu.
   - `description` (optional) is the description of the script.
   - `menu_name` is the name of the menu item that will be displayed in the context menu.
   - `type` is the type of the plugin. It is the list of one or more of `DIRECTORY`, `DIRECTORY_BACKGROUND`, `DRIVE`, `FILES`. See the table below for more information.
