@@ -5,13 +5,11 @@ from pathlib import Path
 from importlib.util import spec_from_file_location, module_from_spec
 from context_menu import menus
 
-
 ROOT = Path(__file__).parent
 PLUGINS_DIR = ROOT / "plugins"
 ASSETS_DIR = ROOT / "assets"
 DOT_ENV = ROOT / ".env"
 plugin_types = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES"]
-
 dotenv.load_dotenv(DOT_ENV)
 
 
@@ -62,10 +60,11 @@ class Plugin:
 
     def enable_plugin(self):
         for type in self.supported_type:
-            print("[ADDING]", type, self.title, "in", self.menu_name)
-            menu = menus.ContextMenu(self.menu_name, type)
-            menu.add_items([menus.ContextCommand(self.title, icon_path=str(self.icon), python=self.driver)])
-            menu.compile()
+            if self.supported_type[type]:
+                print("[ADDING]", type, self.title, "in", self.menu_name)
+                menu = menus.ContextMenu(self.menu_name, type)
+                menu.add_items([menus.ContextCommand(self.title, icon_path=str(self.icon), python=self.driver)])
+                menu.compile()
         self.enable = True
 
     def disable_plugin(self):
@@ -137,7 +136,6 @@ class PluginManager:
                 plugin.enable_plugin()
         print("Re-enabled plugins")
 
-
     def saveSession(self):
         with open("record.json", "w") as f:
             json.dump(
@@ -171,4 +169,3 @@ class PluginManager:
 
     def isAllPluginEnabled(self):
         return all([plugin.enable for plugin in self.plugins])
-
