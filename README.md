@@ -77,8 +77,6 @@ Implement the `driver` function and pass two parameters:
   - `folders` (selected directories)
   - `params` (additional parameters).
 
----
-
 ### **Run the Project**:
   - Run `main.py` to load and manage plugins.
   - Test your plugin by right-clicking on an empty space within a folder.
