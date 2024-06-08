@@ -278,15 +278,15 @@ def create_icon(input_file, folder="", placement="", relative=False, debug=False
         print("Input file need to exist !!!")
 
 
-def get_movie_backdrop(movie_name):
+def get_movie_poster(movie_name):
     params = {
         "query": movie_name,
         "api_key": os.getenv("TMDB_API_KEY"),
     }
-    r = requests.get("https://api.themoviedb.org/3/search/movie", params=params).json()
-    # b = requests.get("https://image.tmdb.org/t/p/w500" + r["results"][0]["backdrop_path"]).content
-    b = requests.get("https://image.tmdb.org/t/p/w500" + r["results"][0]["poster_path"]).content
-    return b
+    response = requests.get("https://api.themoviedb.org/3/search/movie", params=params).json()
+    if not response["results"]:
+        return None
+    return requests.get("https://image.tmdb.org/t/p/w500" + response["results"][0]["poster_path"]).content  # backdrop = backdrop_path
 
 
 def get_movies(folder_path) -> dict[Path, tuple[str, str]]:
@@ -309,20 +309,17 @@ def driver(folders, params):
     folder_path = folders[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
-        if (path / "backdrop.jpg").exists():
+        if (path / "poster.ico").exists():
             continue
-        try:
-            backdrop = get_movie_backdrop(movie[0])
-        except (IndexError, KeyError, TypeError):
-            print(f"Failed to get backdrop for {movie[0]}")
+        if poster := get_movie_poster(movie[0]):
+            with open(path / "poster.jpg", "wb") as f:
+                f.write(poster)
+            create_icon(str(path / "poster.jpg"), str(path))
+            os.remove(path / "poster.jpg")
+        else:
+            print(f"Failed to get poster for {movie[0]}")
             continue
-
-        with open(path / "backdrop.jpg", "wb") as f:
-            f.write(backdrop)
-
-        create_icon(str(path / "backdrop.jpg"), str(path))
-        os.remove(path / "backdrop.jpg")
 
 
 if __name__ == "__main__":
-    driver([r"."], {})
+    driver(["."], {})
