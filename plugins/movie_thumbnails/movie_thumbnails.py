@@ -312,7 +312,7 @@ def driver(folders, params):
         try:
             backdrop = get_movie_backdrop(movie[0])
         except (IndexError, KeyError, TypeError):
-            input(f"Failed to get backdrop for {movie[0]}")
+            print(f"Failed to get backdrop for {movie[0]}")
             continue
 
         with open(path / "backdrop.jpg", "wb") as f:
@@ -323,4 +323,4 @@ def driver(folders, params):
 
 
 if __name__ == "__main__":
-    driver([r"D:\Movies"], {})
+    driver([r"."], {})
