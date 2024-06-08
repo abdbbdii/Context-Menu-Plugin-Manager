@@ -13,6 +13,8 @@ This project manages context menu plugins to extend functionality in various dir
 - **Dynamic Menu Modification:** Add or remove context menu items on the fly.
 - **Extensible:** Customize and extend functionality by creating new plugins.
 
+---
+
 ## Installation
 First make sure you have Python 3.12.2 or above installed. If not, you can download it from [here](https://www.python.org/downloads/).
 1. Clone the repository:
@@ -34,6 +36,8 @@ First make sure you have Python 3.12.2 or above installed. If not, you can downl
   ```
   python main.py
   ```
+
+---
 
 ## Creating a Plugin
 
@@ -89,6 +93,8 @@ def driver(folders, params):
     for folder in folders:
         print("Processing folder:", folder)
 ```
+
+---
 
 ## Example Plugins
 - **Remove Empty Folders:** Recursively remove empty folders within directories.
