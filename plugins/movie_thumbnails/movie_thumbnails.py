@@ -290,16 +290,18 @@ def get_movie_backdrop(movie_name):
 
 
 def get_movies(folder_path):
-    pattern = re.compile(r"^(.*?)[\s(]?(\d{4})")
     folder = Path(folder_path)
     movies = {}
     for path in folder.iterdir():
         if path.is_dir():
-            match = pattern.search(path.name)
-            if match:
-                name, year = match.groups()
-                name = name.strip(" ([")
-                movies[path] = (name, year)
+            if re.match(r".*?(\d{4})", path.name):
+                match = re.match(r"^(.*?)[\s(]?(\d{4})", path.name)
+                if match:
+                    name, year = match.groups()
+                    name = name.strip(" ([")
+                    movies[path] = (name, year)
+            else:
+                movies[path] = (path.name, "")
     return movies
 
 
@@ -310,7 +312,7 @@ def driver(folders, params):
         try:
             backdrop = get_movie_backdrop(movie[0])
         except (IndexError, KeyError, TypeError):
-            print(f"Failed to get backdrop for {movie[0]}")
+            input(f"Failed to get backdrop for {movie[0]}")
             continue
 
         with open(path / "backdrop.jpg", "wb") as f:
