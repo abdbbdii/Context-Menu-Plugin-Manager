@@ -1,15 +1,10 @@
 import os
 import time
-
 from subprocess import run
 from configparser import ConfigParser
-
 import numpy as np
 from PIL import Image
-
 import cv2
-import platform
-
 import re
 import requests
 from pathlib import Path
