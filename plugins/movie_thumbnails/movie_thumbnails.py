@@ -7,7 +7,8 @@ from configparser import ConfigParser
 import numpy as np
 from PIL import Image
 
-import cv2  # opencv-python
+import cv2
+import platform
 
 import re
 import requests
@@ -241,19 +242,6 @@ class IconCreator:
         p = Path(filename)
         return "{0}_{2}{1}".format(Path.joinpath(p.parent, p.stem), p.suffix, time.strftime("%Y%m%d-%H%M%S"))
 
-"""Set folder icon based on the input file"""
-import os
-import platform
-import argparse
-from os import path
-
-if platform.system() == "Windows":
-    from windows_icon import IconCreator
-elif platform.system() == "Darwin":
-    from mac_icon import IconCreator
-else:
-    print("Linux is not supported at this time :(")
-
 
 def create_icon(input_file, folder="", placement="", relative=False, debug=False):
     """
@@ -270,18 +258,12 @@ def create_icon(input_file, folder="", placement="", relative=False, debug=False
 
     # current_platform = platform.system()
 
-    if path.exists(input_file) and path.isfile(input_file):
+    if os.path.exists(input_file) and os.path.isfile(input_file):
         accepted_files = [".jpg", ".jpeg", ".png", ".txt"]
-        if path.splitext(input_file.lower())[1] in accepted_files:
-            if folder == "" or path.isdir(folder):
-                if placement == "" or path.isdir(placement):
-                    if (
-                        relative
-                        and folder != ""
-                        and placement != ""
-                        and os.path.splitdrive(folder.lower())[0]
-                        != os.path.splitdrive(placement.lower())[0]
-                    ):
+        if os.path.splitext(input_file.lower())[1] in accepted_files:
+            if folder == "" or os.path.isdir(folder):
+                if placement == "" or os.path.isdir(placement):
+                    if relative and folder != "" and placement != "" and os.path.splitdrive(folder.lower())[0] != os.path.splitdrive(placement.lower())[0]:
                         relative = False
                     icon_creator = IconCreator(debug)
                     icon_creator.create_icon(input_file, folder, placement, relative)
@@ -291,14 +273,9 @@ def create_icon(input_file, folder="", placement="", relative=False, debug=False
             else:
                 print(folder + " Is not a valid folder.")
         else:
-            print(
-                "Only accepted file formats are: "
-                + ", ".join([str(item) for item in accepted_files])
-            )
+            print("Only accepted file formats are: " + ", ".join([str(item) for item in accepted_files]))
     else:
         print("Input file need to exist !!!")
-
-
 
 
 def get_movie_backdrop(movie_name):
@@ -330,12 +307,12 @@ def driver(folders, params):
     folder_path = folders[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
-        try:
-            backdrop = get_movie_backdrop(movie[0] + " " + movie[1])
+        # try:
+        backdrop = get_movie_backdrop(movie[0])
 
-        except (IndexError, KeyError, TypeError):
-            print(f"Failed to get backdrop for {movie[0]}")
-            continue
+        # except (IndexError, KeyError, TypeError):
+        #     print(f"Failed to get backdrop for {movie[0]}")
+        #     continue
 
         with open(path / "backdrop.jpg", "wb") as f:
             f.write(backdrop)
@@ -344,4 +321,4 @@ def driver(folders, params):
 
 
 if __name__ == "__main__":
-    driver([r"D:\Movies\New folder"], {})
+    driver([r"D:\Movies"], {})
