@@ -289,7 +289,7 @@ def get_movie_backdrop(movie_name):
     return b
 
 
-def get_movies(folder_path):
+def get_movies(folder_path) -> dict[Path, tuple[str, str]]:
     folder = Path(folder_path)
     movies = {}
     for path in folder.iterdir():
@@ -309,6 +309,8 @@ def driver(folders, params):
     folder_path = folders[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
+        if (path / "backdrop.jpg").exists():
+            continue
         try:
             backdrop = get_movie_backdrop(movie[0])
         except (IndexError, KeyError, TypeError):
