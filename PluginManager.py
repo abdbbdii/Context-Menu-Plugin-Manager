@@ -157,6 +157,8 @@ class PluginManager:
 
     def loadSession(self):
         self.loadPluginsFromPluginFolder()
+        if not Path("record.json").exists():
+            return
         with open("record.json", "r") as f:
             for plugin in json.load(f):
                 if temp := self.getPugin(Path(plugin["path"])):
