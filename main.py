@@ -27,16 +27,18 @@ class Component:
         )
 
 
+all_installed = False
+while not all_installed:
+    try:
+        pm = PluginManager()
+    except ModuleNotFoundError as e:
+        system("pip install " + str(e).split("'")[1])
+    else:
+        all_installed = True
+selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
+
+
 def main(page: ft.Page):
-    ModuleNotFound = True
-    while ModuleNotFound:
-        try:
-            pm = PluginManager()
-        except ModuleNotFoundError as e:
-            system("pip install " + str(e).split("'")[1])
-        else:
-            ModuleNotFound = False
-    selected_plugin: Plugin = pm.plugins[0] if pm.plugins else None
 
     def enable_disable_all_btn_click(e):
         if enable_disable_all_btn.text == "Disable All":
@@ -106,7 +108,7 @@ def main(page: ft.Page):
             return
 
         def on_ok(e):
-            dlg_gen.open = False
+            dlg_modal.open = False
             e.control.page.update()
 
             comp = OpenAI()
@@ -117,7 +119,7 @@ def main(page: ft.Page):
                         model="gpt-3.5-turbo",
                         messages=[
                             {"role": "system", "content": f'You are a context menu plugin generator. The plugins that are already created are: - unpack files: {open(PLUGINS_DIR / "unpack_files" / "unpack_files.py").read()}\n - remove extra exe: {open(PLUGINS_DIR / "remove_extra_exe" / "remove_extra_exe.py").read()}\n - git clone: {open(PLUGINS_DIR / "git_clone" / "git_clone.py").read()} etc. Now you have to generate a new plugin in json format such as {{"plugin_content": ,"plugin_file_name": ,"detailed_plugin_description_in_markdown_format": ,"markdown_file_name": }}. But do not include icon in plugin_info variable. The plugin should contain a driver function and plugin_info dictionary just like the examples. The plugin should be able to do the following: - '},
-                            {"role": "user", "content": user_input if user_input else (latest_user_input := dlg_gen.content.value)},
+                            {"role": "user", "content": user_input if user_input else (latest_user_input := dlg_modal.content.value)},
                         ],
                         response_format={"type": "json_object"},
                     )
@@ -169,14 +171,14 @@ def main(page: ft.Page):
                 return
 
         def on_cancel(e):
-            dlg_gen.open = False
+            dlg_modal.open = False
             e.control.page.update()
 
         if user_input:
             on_ok(e)
             return
-        dlg_gen = Component.dlg_ask_input_btn("Generate Plugin", "What do you want to generate?", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=10)
-        e.control.page.dialog = dlg_gen
+        dlg_modal = Component.dlg_ask_input_btn("Generate Plugin", "What do you want to generate?", {"Cancel": on_cancel, "Ok": on_ok}, is_ask=False, max_lines=10)
+        e.control.page.dialog = dlg_modal
         e.control.page.update()
 
     def settings_btn_click(e):
@@ -289,7 +291,7 @@ def main(page: ft.Page):
                                 [
                                     ft.SearchBar(
                                         [ft.ListTile(title=ft.Text(plugin.title), data=plugin.title) for plugin in pm.plugins],
-                                        view_elevation=10,
+                                        view_elevation=1,
                                         bar_leading=ft.IconButton(ft.icons.SEARCH),
                                         bar_hint_text="Search Plugins",
                                         view_hint_text="Search Plugins",
@@ -348,5 +350,5 @@ def main(page: ft.Page):
 
     make_plugin_list()
 
-if __name__ == "__main__":
-    ft.app(main, assets_dir="assets")
+
+ft.app(main, assets_dir="assets")
