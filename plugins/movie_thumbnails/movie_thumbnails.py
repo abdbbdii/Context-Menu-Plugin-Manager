@@ -318,6 +318,7 @@ def driver(folders, params):
             f.write(backdrop)
 
         create_icon(str(path / "backdrop.jpg"), str(path))
+        os.remove(path / "backdrop.jpg")
 
 
 if __name__ == "__main__":
