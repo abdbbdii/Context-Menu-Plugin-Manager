@@ -307,12 +307,11 @@ def driver(folders, params):
     folder_path = folders[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
-        # try:
-        backdrop = get_movie_backdrop(movie[0])
-
-        # except (IndexError, KeyError, TypeError):
-        #     print(f"Failed to get backdrop for {movie[0]}")
-        #     continue
+        try:
+            backdrop = get_movie_backdrop(movie[0])
+        except (IndexError, KeyError, TypeError):
+            print(f"Failed to get backdrop for {movie[0]}")
+            continue
 
         with open(path / "backdrop.jpg", "wb") as f:
             f.write(backdrop)
