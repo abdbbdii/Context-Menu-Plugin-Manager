@@ -240,7 +240,7 @@ def main(page: ft.Page):
             plugin_list.controls = plugins
             plugin_list.update()
 
-    page.title = "Flet counter example"
+    page.title = "Context Menu Plugin Manager"
     page.fonts = {"Inter": "Inter[slnt,wght].ttf"}
 
     page.theme = ft.Theme(font_family="Inter")
