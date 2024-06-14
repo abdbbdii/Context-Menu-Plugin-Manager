@@ -24,7 +24,7 @@ def get_movie_poster(movie_name, year, type="movie"):
     }
     response = requests.get(f"https://api.themoviedb.org/3/search/{type}", params=params).json()
     date_key = "first_air_date" if type == "tv" else "release_date"
-    name_key = "original_name" if type == "tv" else "original_title"
+    name_key = "name" if type == "tv" else "original_title"
     if response["results"]:
         if year:
             found = []
@@ -45,14 +45,15 @@ def get_movies(folder_path) -> dict[Path, tuple[str, str]]:
     movies = {}
     for path in folder.iterdir():
         if path.is_dir():
-            if re.match(r".*?(\d{4})", path.name):
-                match = re.match(r"^(.*?)[\s(]?(\d{4})", path.name)
+            path_name = path.name.replace(".", " ")
+            if re.match(r".*?(\d{4})", path_name):
+                match = re.match(r"^(.*?)[\s(]?(\d{4})", path_name)
                 if match:
                     name, year = match.groups()
                     name = name.strip(" ([")
                     movies[path] = (name, year)
             else:
-                movies[path] = (path.name, "")
+                movies[path] = (path_name, "")
     return movies
 
 
