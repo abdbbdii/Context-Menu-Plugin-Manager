@@ -75,19 +75,16 @@ def driver(folders, params):
 
 
 def is_tv(folder_path: Path | str, name: str):
-    try:
-        files_found = 0
-        folder = Path(folder_path)
-        for path in folder.iterdir():
-            if not path.is_dir() and (path.name.startswith(name) or path.name.startswith(name.replace(" ", "."))) and not path.name.endswith(".srt"):
-                files_found += 1
-                if files_found > 1:
-                    return True
-        return False
-    except Exception as e:
-        print(e)
-        input("Press Enter to continue...")
-        return False
+    files_found = 0
+    folder = Path(folder_path)
+    for path in folder.iterdir():
+        path_name = path.name.replace(".", " ")
+        if not path.is_dir() and (path_name.startswith(name)) and not path.name.endswith(".srt"):
+            files_found += 1
+            if files_found > 1:
+                return True
+            
+    return False
 
 
 if __name__ == "__main__":
