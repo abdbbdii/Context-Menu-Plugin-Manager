@@ -1,7 +1,8 @@
 import os
 import re
-import requests
 from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
 from f_icon import create_icon
 
@@ -83,7 +84,7 @@ def is_tv(folder_path: Path | str, name: str):
             files_found += 1
             if files_found > 1:
                 return True
-            
+
     return False
 
 

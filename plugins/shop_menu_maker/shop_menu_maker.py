@@ -61,8 +61,8 @@ def main(file_path):
         file = open(TEMPLATE_PATH / f"shop_menu_template_{key}.svg", "rb").read()
         for key_, value in json_file.items():
             file = file.decode().replace(key_, str(value) if value else "").encode()
-        svg_to_pdf([file], CWD / f"shop_menu_{key}.pdf")
-        startfile(CWD / f"shop_menu_{key}.pdf")
+        svg_to_pdf([file], str(CWD / f"shop_menu_{key}.pdf"))
+        startfile(str(CWD / f"shop_menu_{key}.pdf"))
 
     # doing for flex
     if not Path(TEMPLATE_PATH / f"shop_menu_template_flex.svg").exists():
@@ -87,9 +87,9 @@ def main(file_path):
             file_ = file_.replace(key_, str(value))
         files.append(file_.encode())
 
-    svg_to_pdf(files, CWD / f"shop_menu_flex.pdf")
-    startfile(CWD / f"shop_menu_flex.pdf")
+    svg_to_pdf(files, str(CWD / f"shop_menu_flex.pdf"))
+    startfile(str(CWD / f"shop_menu_flex.pdf"))
 
 
 if __name__ == "__main__":
-    main("")
+    main("shop_menu.json")
