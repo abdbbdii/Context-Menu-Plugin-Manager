@@ -7,21 +7,59 @@ from openai import OpenAI, OpenAIError
 import json
 from send2trash import send2trash
 
+PRIMARY_CLR = "#468189"
+SECONDARY_CLR = "#c9bfa5"
+LIGHTPRIMARY_CLR = "#468189"
+BACKGROUND0_CLR = "#031926"
+BACKGROUND1_CLR = "#042131"
+BACKGROUND2_CLR = "#052a3f"
+BACKGROUND3_CLR = "#052a3f"
+DISABLED_CLR = "#acacac"
+TEXT_CLR = "#ffffff"
 
+# PRIMARY_CLR = "#72bad5"
+# SECONDARY_CLR = "#ef4043"
+# LIGHTPRIMARY_CLR = "#72bad5"
+# BACKGROUND0_CLR = "#01263d"
+# BACKGROUND1_CLR = "#03324e"
+# BACKGROUND2_CLR = "#0e4c6d"
+# BACKGROUND3_CLR = "#0e4c6d"
+# DISABLED_CLR = "#acacac"
+# TEXT_CLR = "#ffffff"
+
+# PRIMARY_CLR = "#d8dee9"
+# SECONDARY_CLR = "#eceff4"
+# LIGHTPRIMARY_CLR = "#d8dee9"
+# BACKGROUND0_CLR = "#2e3440"
+# BACKGROUND1_CLR = "#3b4252"
+# BACKGROUND2_CLR = "#434c5e"
+# BACKGROUND3_CLR = "#4c566a"
+# DISABLED_CLR = "#acacac"
+# TEXT_CLR = "#ffffff"
+
+# PRIMARY_CLR = "#3502c9"
+# SECONDARY_CLR = "#F80267"
+# LIGHTPRIMARY_CLR = "#9ecaff"
+# BACKGROUND0_CLR = "#151635"
+# BACKGROUND1_CLR = "#1d1c44"
+# BACKGROUND2_CLR = "#242458"
+# BACKGROUND3_CLR = "#222048"
+# DISABLED_CLR = "#8d9199"
+# TEXT_CLR = "#ffffff"
 class Component:
     def Button(text, on_click):
-        return ft.FilledButton(text, on_click=on_click, style=ft.ButtonStyle(bgcolor="#3502c9", color="white", padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)), height=30)
+        return ft.FilledButton(text, on_click=on_click, style=ft.ButtonStyle(bgcolor=PRIMARY_CLR, color=TEXT_CLR, padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)), height=30)
 
     def dlg_ask_input_btn(title, content, options: dict, is_ask=True, max_lines=1):
         return ft.AlertDialog(
             modal=True,
             title=ft.Text(title),
-            content=ft.Text(content) if is_ask else ft.TextField(label=content, multiline=True, max_lines=max_lines, expand=True, border_color="#9ecaff", border_width=2, autofocus=True, width=500),
+            content=ft.Text(content) if is_ask else ft.TextField(label=content, multiline=True, max_lines=max_lines, expand=True, border_color=LIGHTPRIMARY_CLR, border_width=2, autofocus=True, width=500),
             actions=[
-                *[ft.TextButton(text, on_click=on_click, style=ft.ButtonStyle(color="white")) for text, on_click in options.items()],
+                *[ft.TextButton(text, on_click=on_click, style=ft.ButtonStyle(color=TEXT_CLR)) for text, on_click in options.items()],
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#1d1c44",
+            bgcolor=BACKGROUND1_CLR,
             open=True,
             shape=ft.RoundedRectangleBorder(radius=10),
         )
@@ -225,13 +263,13 @@ def main(page: ft.Page):
                     ft.Row(
                         [
                             ft.Image(plugin.icon, width=40, height=40, border_radius=10),
-                            ft.CupertinoButton(plugin.title, color="white", expand=True, alignment=ft.alignment.center_left, on_click=on_button_click_closure(plugin)),
-                            plugin_switch := ft.Switch(value=plugin.enable, thumb_color="white", inactive_thumb_color="#8d9199", active_track_color="#3502c9", inactive_track_color="#222048"),
+                            ft.CupertinoButton(plugin.title, color=TEXT_CLR, expand=True, alignment=ft.alignment.center_left, on_click=on_button_click_closure(plugin)),
+                            plugin_switch := ft.Switch(value=plugin.enable, thumb_color=TEXT_CLR, inactive_thumb_color=DISABLED_CLR, active_track_color=PRIMARY_CLR, inactive_track_color=BACKGROUND3_CLR),
                         ],
                         height=60,
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     ),
-                    bgcolor="#242458",
+                    bgcolor=BACKGROUND2_CLR,
                     border_radius=5,
                     padding=ft.padding.Padding(10, 0, 10, 0),
                 )
@@ -245,7 +283,7 @@ def main(page: ft.Page):
 
     page.theme = ft.Theme(font_family="Inter")
     page.padding = 0
-    page.bgcolor = "#151635"
+    page.bgcolor = BACKGROUND0_CLR
     page.window_height = 840
     page.window_width = 1440
     page.window_min_height = 713
@@ -260,7 +298,7 @@ def main(page: ft.Page):
                         [
                             ft.Row(
                                 [
-                                    ft.Text("Plugins", color="white", size=18, weight=ft.FontWeight.W_700),
+                                    ft.Text("Plugins", color=TEXT_CLR, size=18, weight=ft.FontWeight.W_700),
                                     ft.Row(
                                         [
                                             ft.IconButton(ft.icons.REFRESH, on_click=lambda e: make_plugin_list()),
@@ -278,7 +316,7 @@ def main(page: ft.Page):
                             ),
                         ],
                     ),
-                    bgcolor="#1d1c44",
+                    bgcolor=BACKGROUND1_CLR,
                     padding=20,
                     width=350,
                     border_radius=ft.border_radius.BorderRadius(0, 20, 0, 20),
@@ -296,16 +334,16 @@ def main(page: ft.Page):
                                         bar_hint_text="Search Plugins",
                                         view_hint_text="Search Plugins",
                                         expand=True,
-                                        divider_color="#1d1c44",
-                                        bar_bgcolor="#222048",
-                                        view_bgcolor="#222048",
+                                        divider_color=BACKGROUND1_CLR,
+                                        bar_bgcolor=BACKGROUND3_CLR,
+                                        view_bgcolor=BACKGROUND3_CLR,
                                         height=50,
                                         disabled=True,
                                         tooltip="Not implemented yet!"
                                     ),
-                                    ft.IconButton(ft.icons.BOLT, on_click=generate_btn_click, bgcolor="#F80267", icon_color="white", height=50, width=50, tooltip="Generate Plugin"),
-                                    ft.IconButton(ft.icons.ADD, on_click=add_plugin_btn_click, bgcolor="#3502C9", icon_color="white", height=50, width=50, tooltip="Add Plugin"),
-                                    ft.IconButton(ft.icons.SETTINGS, on_click=settings_btn_click, bgcolor="#3502C9", icon_color="white", height=50, width=50, disabled=True, tooltip="Not implemented yet!"),
+                                    ft.IconButton(ft.icons.BOLT, on_click=generate_btn_click, bgcolor=SECONDARY_CLR, icon_color=TEXT_CLR, height=50, width=50, tooltip="Generate Plugin"),
+                                    ft.IconButton(ft.icons.ADD, on_click=add_plugin_btn_click, bgcolor=PRIMARY_CLR, icon_color=TEXT_CLR, height=50, width=50, tooltip="Add Plugin"),
+                                    ft.IconButton(ft.icons.SETTINGS, on_click=settings_btn_click, bgcolor=PRIMARY_CLR, icon_color=TEXT_CLR, height=50, width=50, disabled=True, tooltip="Not implemented yet!"),
                                 ],
                                 spacing=20,
                             ),
@@ -317,7 +355,7 @@ def main(page: ft.Page):
                                             ft.Column(
                                                 [
                                                     plugin_title := ft.Text(selected_plugin.title, size=20),
-                                                    plugin_description := ft.Text(selected_plugin.description, size=14, color="#9494ba"),
+                                                    plugin_description := ft.Text(selected_plugin.description, size=14, color=DISABLED_CLR),
                                                     ft.Row(
                                                         [
                                                             Component.Button("Configure", lambda e: configure__btn_click()),
@@ -331,7 +369,7 @@ def main(page: ft.Page):
                                             ),
                                         ],
                                     ),
-                                    ft.Divider(thickness=2, color="#242458"),
+                                    ft.Divider(thickness=2, color=BACKGROUND2_CLR),
                                     plugin_markdown := ft.Markdown(
                                         open(selected_plugin.markdown, "r", encoding="utf-8").read() if selected_plugin.markdown else "",
                                         expand=True,
