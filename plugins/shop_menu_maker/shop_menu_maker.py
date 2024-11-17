@@ -48,7 +48,7 @@ def svg_to_pdf(svg_files, output_file_path):
 def main(file_path):
     figma_file_ids = {
         "small": "jEri2nQqWrng6rRge6v2Sv",
-        "large": "jEri2nQqWrng6rRge6v2Sv",
+        "large": "jWgeXY0sI82W4YvKzy7J2H",
     }
     json_file = json.loads(open(file_path, "r").read())
     CWD = Path(file_path).parent

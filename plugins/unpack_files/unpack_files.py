@@ -10,8 +10,6 @@ plugin_info = {
 
 
 def driver(folders, params):
-    if not messagebox.askyesno("Unpack Files", "Do you want to unpack all files in the selected folder(s)?"):
-        return
     count = 0
     for folder in folders:
         for file in os.listdir(folder):
@@ -20,5 +18,9 @@ def driver(folders, params):
             count += 1
     if count == 0:
         messagebox.showinfo("No file to unpack", "No file to unpack")
-    else:
-        messagebox.showinfo("File(s) unpacked", str(count) + " file(s) unpacked.")
+    # else:
+    #     messagebox.showinfo("File(s) unpacked", str(count) + " file(s) unpacked.")
+
+if __name__ == "__main__":
+    for folder in os.listdir(r"C:\Users\ar69k\OneDrive - student.uet.edu.pk\Pictures\mama gallery\WhatsApp Images"):
+        driver([r"C:\Users\ar69k\OneDrive - student.uet.edu.pk\Pictures\mama gallery\WhatsApp Images"+'\\'+folder], {})
