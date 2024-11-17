@@ -16,8 +16,11 @@ def driver(folders, params):
         for folder in folders:
             for file in os.listdir(folder):
                 if os.path.isfile(os.path.join(folder, file)):
-                    with open(os.path.join(folder, file), "r") as f:
-                        content[file] = f.read()
+                    try:
+                        with open(os.path.join(folder, file), "r") as f:
+                            content[file] = f.read()
+                    except Exception as e:
+                        print(f"Error reading file {file}: {str(e)}")
         res = filter_window(content.keys())
         if res == {}:
             return
