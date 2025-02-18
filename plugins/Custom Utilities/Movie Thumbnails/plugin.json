@@ -1,0 +1,16 @@
+{
+    "description": "Create thumbnails for movies",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND",
+        "DIRECTORY"
+    ],
+    "configs": [
+        {
+            "name": "tmdb_api_key",
+            "type": "str",
+            "label": "TMDB API Key",
+            "description": "API key for The Movie Database",
+            "default": ""
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "description": "Make PDF For ID Cards from figma design",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND"
+    ],
+    "configs": [
+        {
+            "name": "id_card_file_code",
+            "label": "ID Card File Code",
+            "description": "ID Card File Code from Figma",
+            "type": "str",
+            "default": ""
+        },
+        {
+            "name": "figma_api_key",
+            "label": "Figma API Key",
+            "description": "Figma API Key",
+            "type": "str",
+            "default": ""
+        }
+    ]
+}

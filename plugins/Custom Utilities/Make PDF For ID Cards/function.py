@@ -1,36 +1,29 @@
-import xml.etree.ElementTree as ET
+import json
 from io import BytesIO
-from base64 import b64encode
-from os import startfile, getenv
-from requests import get
+from os import startfile
 from pathlib import Path
-from dotenv import load_dotenv
+from base64 import b64encode
 from tkinter import messagebox
+import xml.etree.ElementTree as ET
 
+from requests import get
 from svglib.svglib import svg2rlg
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 from reportlab.graphics import renderPDF
 
-plugin_info = {
-    "title": "Make PDF For ID Cards",
-    "description": "Make PDF For ID Cards from figma design",
-    "type": ["DIRECTORY_BACKGROUND"],
-    "menu_name": "abd Utils",
-}
 
-
-def driver(folders, params):
+def driver(folders: list[str] = [], params: str = ""):
     for folder in folders:
         try:
-            main(folder)
+            main(folder, json.loads(params))
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
 
-ROOT = Path(__file__).parent.parent.parent
-load_dotenv(dotenv_path=ROOT / ".env")
-TEMPLATE_PATH = ROOT / "assets" / "templates"
+TEMPLATE_PATH = Path(__file__).parent / "cache"
+if not TEMPLATE_PATH.exists():
+    TEMPLATE_PATH.mkdir(exist_ok=True)
 
 
 def svg_to_pdf(svg_files, output_file_path):
@@ -42,11 +35,11 @@ def svg_to_pdf(svg_files, output_file_path):
     c.save()
 
 
-def get_file_from_figma(file_id, format, frame="0:1"):
-    if getenv("FIGMA_API_KEY") is None:
-        messagebox("Error", "FIGMA_API_KEY not found in .env file")
+def get_file_from_figma(figma_api_key, file_id, format, frame="0:1"):
+    if figma_api_key is None:
+        messagebox("Error", "figma_api_key not found")
         exit(1)
-    response = get(get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": frame, "format": format, "svg_outline_text": "false"}, headers={"X-Figma-Token": getenv("FIGMA_API_KEY")}).json()["images"]["0:1"])
+    response = get(get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": frame, "format": format, "svg_outline_text": "false"}, headers={"X-Figma-Token": figma_api_key}).json()["images"]["0:1"])
     return response.content
 
 
@@ -73,12 +66,12 @@ def convert_rect_to_image(svg_file_path, image_file_path):
     return ET.tostring(root)
 
 
-def main(file_path):
+def main(file_path, params):
     CWD = Path(file_path)
     if not (CWD / "front.jpg").exists() or not (CWD / "back.jpg").exists():
         raise FileNotFoundError("front.jpg or back.jpg not found in the folder")
     if not (TEMPLATE_PATH / "id_card_template.svg").exists():
-        file = get_file_from_figma("mOlDFFrDYUrhUcqQFGPaVV", "svg")
+        file = get_file_from_figma(params["figma_api_key"], params["id_card_file_code"], "svg")
         open(TEMPLATE_PATH / "id_card_template.svg", "wb").write(file)
     else:
         file = open(TEMPLATE_PATH / "id_card_template.svg", "rb").read()
@@ -91,5 +84,6 @@ def main(file_path):
     svg_to_pdf([correctedSvg["front"], correctedSvg["back"]], output_file_path)
     startfile(output_file_path)
 
+
 if __name__ == "__main__":
-    main("")
+    driver(["."])

@@ -3,15 +3,8 @@ import tkinter as tk
 import os
 from send2trash import send2trash
 
-plugin_info = {
-    "title": "Remove Empty Folders",
-    "description": "Remove empty folders from the selected folder(s)",
-    "type": ["DIRECTORY_BACKGROUND", "DIRECTORY"],
-    "menu_name": "abd Utils",
-}
 
-
-def driver(folders, params):
+def driver(folders: list[str] = [], params: str = ""):
     try:
         level = selector_window()
         folders_to_remove = []

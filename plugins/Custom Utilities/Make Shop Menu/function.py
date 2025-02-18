@@ -1,7 +1,6 @@
 from requests import get
-from os import startfile, getenv
+from os import startfile
 import json
-from dotenv import load_dotenv
 from io import BytesIO
 from tkinter import messagebox
 from pathlib import Path
@@ -10,29 +9,21 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 
-plugin_info = {
-    "title": "Make Shop Menu",
-    "description": "Make Shop Menu from figma design",
-    "type": ["FILES"],
-    "menu_name": "abd Utils",
-}
 
-
-def driver(files, params):
-    for file in files:
+def driver(folders: list[str] = [], params: str = ""):
+    for file in folders:
         try:
-            main(file)
+            main(file, json.loads(params))
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
 
-ROOT = Path(__file__).parent.parent.parent
-load_dotenv(dotenv_path=ROOT / ".env")
-TEMPLATE_PATH = ROOT / "assets" / "templates"
+TEMPLATE_PATH = Path(__file__).parent / "cashe"
+if not TEMPLATE_PATH.exists():
+    TEMPLATE_PATH.mkdir(exist_ok=True)
 
-
-def get_file_from_figma(file_id, format, frame="0:1"):
-    response = get(get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": frame, "format": format, "svg_outline_text": "false"}, headers={"X-Figma-Token": getenv("FIGMA_API_KEY")}).json()["images"]["0:1"])
+def get_file_from_figma(api_key, file_id, format, frame="0:1"):
+    response = get(get(f"https://api.figma.com/v1/images/{file_id}/", params={"ids": frame, "format": format, "svg_outline_text": "false"}, headers={"X-Figma-Token": api_key}).json()["images"]["0:1"])
     return response.content
 
 
@@ -45,17 +36,17 @@ def svg_to_pdf(svg_files, output_file_path):
     c.save()
 
 
-def main(file_path):
+def main(file_path, params):
     figma_file_ids = {
-        "small": "jEri2nQqWrng6rRge6v2Sv",
-        "large": "jWgeXY0sI82W4YvKzy7J2H",
+        "small": params["small_menu_file_code"],
+        "large": params["large_menu_file_code"],
     }
     json_file = json.loads(open(file_path, "r").read())
     CWD = Path(file_path).parent
 
     for key, value in figma_file_ids.items():
         if not Path(TEMPLATE_PATH / f"shop_menu_template_{key}.svg").exists():
-            file = get_file_from_figma(value, "svg")
+            file = get_file_from_figma(params["figma_api_key"], value, "svg")
             open(TEMPLATE_PATH / f"shop_menu_template_{key}.svg", "wb").write(file)
     for key in figma_file_ids.keys():
         file = open(TEMPLATE_PATH / f"shop_menu_template_{key}.svg", "rb").read()
@@ -66,7 +57,7 @@ def main(file_path):
 
     # doing for flex
     if not Path(TEMPLATE_PATH / f"shop_menu_template_flex.svg").exists():
-        flex_file = get_file_from_figma("5zRMQEXHL0SMV1rDZuRCWK", "svg")
+        flex_file = get_file_from_figma(params["figma_api_key"], params["flex_menu_file_code"], "svg")
         open(TEMPLATE_PATH / f"shop_menu_template_flex.svg", "wb").write(flex_file)
     flex_file = open(TEMPLATE_PATH / f"shop_menu_template_flex.svg", "rb").read()
 
@@ -92,4 +83,4 @@ def main(file_path):
 
 
 if __name__ == "__main__":
-    main("shop_menu.json")
+    driver(["shop_menu.json"])

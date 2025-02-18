@@ -2,15 +2,8 @@ import os, pyperclip
 from tkinter import ttk, messagebox
 import tkinter as tk
 
-plugin_info = {
-    "title": "Copy Batch File Content",
-    "description": "Copy the content of all files in the current directory to the clipboard.",
-    "type": ["DIRECTORY_BACKGROUND"],
-    "menu_name": "abd Utils",
-}
 
-
-def driver(folders, params):
+def driver(folders: list[str] = [], params: str = ""):
     try:
         content = {}
         for folder in folders:
@@ -96,4 +89,4 @@ def filter_window(folders):
 
 
 if __name__ == "__main__":
-    driver(["."], {})
+    driver(["."])

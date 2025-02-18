@@ -2,34 +2,28 @@ from pathlib import Path
 import os
 from tkinter import messagebox
 
-plugin_info = {
-    "title": "Display Folder Tree",
-    "description": "Display the folder tree of the current directory",
-    "type": ["DIRECTORY_BACKGROUND"],
-    "menu_name": "abd Utils",
-}
-
 
 def driver(folders, params):
     try:
         # Get the path of the current directory
-        paths = DisplayablePath.make_tree(
-            Path(folders[0]),
-            criteria=lambda path: True if path.name not in ('.git',  '__pycache__', 'env', '.vscode') else False
-        )
+        skip_folders = [".git", "__pycache__", "env", ".vscode"]
+        print("Skip folders: ", skip_folders)
+        if more_skip_folders := input("Enter more folders to skip separated by comma: "):
+            skip_folders.extend(more_skip_folders.split(","))
+
+        paths = DisplayablePath.make_tree(Path(folders[0]), criteria=lambda path: True if path.name not in skip_folders else False)
         for path in paths:
             print(path.displayable())
-        os.system('pause')
+        os.system("pause")
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
 
-
 class DisplayablePath(object):
     display_filename_prefix_middle = "├─"
-    display_filename_prefix_last   = "└─"
-    display_parent_prefix_middle   = "   "
-    display_parent_prefix_last     = "│  "
+    display_filename_prefix_last = "└─"
+    display_parent_prefix_middle = "   "
+    display_parent_prefix_last = "│  "
 
     def __init__(self, path, parent_path, is_last):
         self.path = Path(str(path))
@@ -97,5 +91,3 @@ class DisplayablePath(object):
 # paths = DisplayablePath.make_tree(Path('whatsappBotApp'), criteria=is_not_hidden)
 # for path in paths:
 #     print(path.displayable())
-
-

@@ -1,0 +1,7 @@
+{
+    "description": "Unpack all files in the selected folder(s) to the parent folder(s)",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND",
+        "DIRECTORY"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "description": "Copy the content of all files in the current directory to the clipboard.",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND"
+    ]
+}

@@ -1,0 +1,37 @@
+{
+    "description": "Make Shop Menu from figma design",
+    "supported_types": [
+        "FILES"
+    ],
+    "configs": [
+        {
+            "name": "small_menu_file_code",
+            "label": "Small Menu File Code",
+            "description": "Small Menu File Code from Figma",
+            "type": "str",
+            "default": ""
+        },
+        {
+            "name": "large_menu_file_code",
+            "label": "Large Menu File Code",
+            "description": "Large Menu File Code from Figma",
+            "type": "str",
+            "default": ""
+        },
+        {
+            "name": "flex_menu_file_code",
+            "label": "Flex Menu File Code",
+            "description": "Flex Menu File Code from Figma",
+            "type": "str",
+            "default": ""
+        },
+        {
+            "name": "figma_api_key",
+            "label": "Figma API Key",
+            "description": "Figma API Key",
+            "type": "str",
+            "default": ""
+        }
+
+    ]
+}

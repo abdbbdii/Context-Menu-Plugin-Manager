@@ -1,8 +1,9 @@
 __pycache__
+cache
 .env
 .venv
 .vs
 .vscode
-record.json
+record.json*
 tempCodeRunnerFile.*
-.gitignore
+*.old

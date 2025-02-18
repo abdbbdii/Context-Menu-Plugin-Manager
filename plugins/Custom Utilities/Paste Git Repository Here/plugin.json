@@ -1,0 +1,6 @@
+{
+    "description": "Clone a git repository",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND"
+    ]
+}

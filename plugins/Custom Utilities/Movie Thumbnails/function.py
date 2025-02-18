@@ -1,27 +1,15 @@
 import os
 import re
+import json
 from pathlib import Path
 
 import requests
-from dotenv import load_dotenv
 from f_icon import create_icon
 
-ROOT = Path(__file__).parent.parent.parent
-load_dotenv(dotenv_path=ROOT / ".env")
-
-
-plugin_info = {
-    "title": "Movie Thumbnails",
-    "description": "Create thumbnails for movies",
-    "type": ["DIRECTORY_BACKGROUND", "DIRECTORY"],
-    "menu_name": "abd Utils",
-}
-
-
-def get_movie_poster(movie_name, year, type="movie"):
+def get_movie_poster(api_key, movie_name, year, type="movie"):
     params = {
         "query": movie_name,
-        "api_key": os.getenv("TMDB_API_KEY"),
+        "api_key": api_key,
     }
     response = requests.get(f"https://api.themoviedb.org/3/search/{type}", params=params).json()
     date_key = "first_air_date" if type == "tv" else "release_date"
@@ -58,13 +46,13 @@ def get_movies(folder_path) -> dict[Path, tuple[str, str]]:
     return movies
 
 
-def driver(folders, params):
+def driver(folders: list[str] = [], params: str = ""):
     folder_path = folders[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
         if (path / "poster.ico").exists():
             continue
-        if poster := get_movie_poster(movie[0], movie[1], "movie" if not is_tv(path, movie[0]) else "tv"):
+        if poster := get_movie_poster(json.loads(params)["tmdb_api_key"], movie[0], movie[1], "movie" if not is_tv(path, movie[0]) else "tv"):
             with open(path / "poster.jpg", "wb") as f:
                 f.write(poster)
             create_icon(str(path / "poster.jpg"), str(path))
@@ -72,7 +60,6 @@ def driver(folders, params):
         else:
             print(f"Failed to get poster for {movie[0]}")
             continue
-    input("Press Enter to continue...")
 
 
 def is_tv(folder_path: Path | str, name: str):
@@ -89,4 +76,4 @@ def is_tv(folder_path: Path | str, name: str):
 
 
 if __name__ == "__main__":
-    driver(["."], {})
+    driver(["."])

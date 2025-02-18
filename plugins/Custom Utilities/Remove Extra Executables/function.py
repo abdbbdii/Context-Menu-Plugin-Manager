@@ -4,15 +4,8 @@ from send2trash import send2trash
 from tkinter import ttk
 import tkinter as tk
 
-plugin_info = {
-    "title": "Remove Extra Executables",
-    "description": "Remove extra C/C++ executables from the selected folder(s)",
-    "type": ["DIRECTORY_BACKGROUND", "DIRECTORY"],
-    "menu_name": "abd Utils",
-}
 
-
-def driver(folders, params):
+def driver(folders: list[str] = [], params: str = ""):
     try:
         dict_of_files = {}
         allowed = ["cpp", "c"]

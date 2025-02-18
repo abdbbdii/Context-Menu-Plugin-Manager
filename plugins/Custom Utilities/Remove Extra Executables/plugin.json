@@ -1,0 +1,7 @@
+{
+    "description": "Remove extra C/C++ executables from the selected folder(s)",
+    "supported_types": [
+        "DIRECTORY_BACKGROUND",
+        "DIRECTORY"
+    ]
+}
