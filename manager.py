@@ -6,8 +6,6 @@ from types import FunctionType
 from typing import Literal, Any
 from importlib.util import spec_from_file_location, module_from_spec
 
-import dotenv
-
 from context_menu import menus
 
 
@@ -17,7 +15,6 @@ ASSETS_DIR = ROOT / "assets"
 SESSION_FILE = ROOT / "record.json"
 DOT_ENV = ROOT / ".env"
 plugin_types = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"]
-dotenv.load_dotenv(DOT_ENV)
 
 
 def driver_decorator(func: FunctionType) -> FunctionType:
@@ -39,13 +36,13 @@ class Plugin(menus.ContextCommand):
     def __init__(
         self,
         name: str,
-        python: FunctionType,
-        path: Path,
+        python: FunctionType | None = None,
+        path: Path | str | None = None,
         icon_path: Path | str | None = None,
         markdown: Path | str | None = None,
         description: str | None = None,
         supported_types: list[Literal["FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "DESKTOP"]] | None = None,
-        enabled: bool = True,
+        enabled: bool = False,
         configs: dict[str, Any] | None = None,
     ):
         super().__init__(
@@ -92,10 +89,11 @@ class Plugin(menus.ContextCommand):
         )
 
     def __repr__(self):
-        return "ContextCommand(name='{}', icon_path='{}', params='{}')".format(
+        return "ContextCommand(name='{}', icon_path='{}', params='{}') {}".format(
             self.name,
             self.icon_path,
             json.dumps(self.configs).replace(r'"', r"\"") if self.configs else "",
+            self.selected_types,
         )
 
     @staticmethod
@@ -120,8 +118,8 @@ class Menu(menus.ContextMenu):
     def __init__(
         self,
         name: str,
-        description: str,
-        path: Path,
+        description: str | None = None,
+        path: Path | str | None = None,
         icon_path: Path | str | None = None,
     ):
         self.id = uuid.uuid4()
@@ -131,7 +129,7 @@ class Menu(menus.ContextMenu):
         self.sub_items: list[menus.ItemType] = []
         self.path = path
         self.type = None
-        self.enabled = True
+        self.enabled = False
         super().__init__(
             name=name,
             type=None,
@@ -160,13 +158,19 @@ class Menu(menus.ContextMenu):
 
 
 class PluginManager:
-    def __init__(self, path: Path | str):
+    def __init__(self, path: Path | str = PLUGINS_DIR, no_setup=False):
         self.items: list[Plugin | Menu] = []
-        self.generate_context_menu(path)
+        if no_setup:
+            return
+        self.get_from_path(path)
         self.selected_plugin: Plugin | None = self.get_first_plugin()
         self.load_session()
 
-    def generate_context_menu(self, path: Path | str):
+    class ItemType:
+        MENU = Menu
+        PLUGIN = Plugin
+
+    def get_from_path(self, path: Path | str):
         path = Path(path).resolve()
         if not os.path.exists(path) or not os.path.isdir(path):
             print(f"The directory '{path}' does not exist.")
@@ -188,7 +192,7 @@ class PluginManager:
         #         menus.FastCommand(plugin, type="FILES", python=plugin.python).compile()
 
     def set_attr(self, id: uuid.UUID, attr: str, value):
-        for plugin in self.walk_plugin():
+        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 setattr(plugin, attr, value)
 
@@ -207,6 +211,10 @@ class PluginManager:
                     menu.add_items([plugin])
             break
 
+    def print(self):
+        for item in self.items:
+            PluginManager.recursive_print(item)
+
     @staticmethod
     def recursive_print(menu: Menu | Plugin, level: int = 0):
         print("  " * level, menu)
@@ -222,17 +230,18 @@ class PluginManager:
                 for type in plugin_types:
                     new_menu = Menu(name=plugin.name, description=plugin.description, icon_path=plugin.icon_path, path=plugin.path)
                     new_menu.type = type
-                    self._expand_menu_types(new_menu, plugin, type, filter)
+                    PluginManager.__expand_menu_types(new_menu, plugin, type, filter)
                     if new_menu.sub_items:
                         expanded_plugins.append(new_menu)
         return expanded_plugins
 
-    def _expand_menu_types(self, new_menu: Menu, original_menu: Menu, type: str, filter=None):
+    @staticmethod
+    def __expand_menu_types(new_menu: Menu, original_menu: Menu, type: str, filter=None):
         for item in original_menu.sub_items:
             if isinstance(item, Menu):
                 sub_menu = Menu(name=item.name, description=item.description, icon_path=item.icon_path, path=item.path)
                 sub_menu.type = type
-                self._expand_menu_types(sub_menu, item, type)
+                PluginManager.__expand_menu_types(sub_menu, item, type)
                 if sub_menu.sub_items:
                     new_menu.add_items([sub_menu])
             elif isinstance(item, Plugin) and (not filter or filter(item)):
@@ -254,12 +263,20 @@ class PluginManager:
                 except:
                     pass
 
+    def disable_all(self):
+        for plugin in self.walk_items():
+            plugin.enabled = False
+
+    def enable_all(self):
+        for plugin in self.walk_items():
+            plugin.enabled = True
+
     def get_first_plugin(self) -> Plugin:
-        for plugin in self.walk_plugin():
+        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
             return plugin
 
     def select_plugin(self, id: uuid.UUID):
-        for plugin in self.walk_plugin():
+        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 self.selected_plugin = plugin
                 return plugin
@@ -278,62 +295,98 @@ class PluginManager:
                 item.compile()
 
     def is_all_plugin_enabled(self):
-        for plugin in self.walk_plugin():
+        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
             if not plugin.enabled:
                 return False
         return True
 
     def is_all_plugin_disabled(self):
-        for plugin in self.walk_plugin():
+        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
             if plugin.enabled:
                 return False
         return True
 
-    def walk_plugin(self):
+    def walk_items(self, filter_type: Any | None = None):
         if not self.items:
             return
         for item in self.items:
-            if isinstance(item, Plugin):
+            if filter_type is None or isinstance(item, filter_type):
                 yield item
             if isinstance(item, Menu):
-                for plugin in self.walk_plugin_(item):
-                    yield plugin
+                yield from PluginManager.__walk_items(item, filter_type)
 
-    def walk_plugin_(self, menu: Menu):
+    def __walk_items(menu: Menu, walk_only: Any | None = None):
         for item in menu.sub_items:
-            if isinstance(item, Plugin):
+            if walk_only is None or isinstance(item, walk_only):
                 yield item
-            elif isinstance(item, Menu):
-                self.walk_plugin_(item)
+            if isinstance(item, Menu):
+                yield from PluginManager.__walk_items(item, walk_only)
 
     def save_session(self):
+        def serialize_item(item):
+            if isinstance(item, Plugin):
+                return {
+                    "instance": "Plugin",
+                    "name": item.name,
+                    "params": json.loads(item.params.replace(r"\"", r'"')) if item.params else {},
+                    "enabled": item.enabled,
+                    "selected_types": item.selected_types,
+                }
+            elif isinstance(item, Menu):
+                return {
+                    "instance": "Menu",
+                    "name": item.name,
+                    "enabled": item.enabled,
+                    "sub_items": [serialize_item(child) for child in item.sub_items],
+                }
+
         with open(SESSION_FILE, "w") as f:
-            session = []
-            for plugin in self.walk_plugin():
-                session.append(
-                    {
-                        "name": plugin.name,
-                        "params": json.loads(plugin.params.replace(r"\"", r'"')) if plugin.params else {},
-                        "enabled": plugin.enabled,
-                        "selected_types": plugin.selected_types,
-                    }
-                )
+            session = [serialize_item(item) for item in self.items]
+
             json.dump(session, f, indent=4)
 
     def load_session(self):
+        def deserialize_item(data):
+            if data["instance"] == "Plugin":
+                plugin = Plugin(name=data["name"])
+                plugin.enabled = data["enabled"]
+                plugin.params = data["params"]
+                plugin.selected_types = data["selected_types"]
+                return plugin
+            elif data["instance"] == "Menu":
+                menu = Menu(name=data["name"])
+                menu.enabled = data["enabled"]
+                menu.sub_items = [deserialize_item(child) for child in data["sub_items"]]
+                return menu
+
         if not SESSION_FILE.exists():
             return
+
+        prev_session = PluginManager(no_setup=True)
         with open(SESSION_FILE, "r") as f:
-            for plugin in json.load(f):
-                found = False
-                for p in self.walk_plugin():
-                    if p.name == plugin["name"]:
-                        found = True
-                        p.enabled = plugin["enabled"]
-                        p.params = json.dumps(plugin["params"]).replace(r'"', r"\"")
-                        p.selected_types = plugin["selected_types"]
-                        p.configs = Plugin.edit_config_from_params(plugin["params"], p.configs)
-                        break
-                if not found:
-                    for type in plugin["selected_types"]:
-                        menus.removeMenu(plugin["name"], type=type)
+            session_data = json.load(f)
+            prev_session.items = [deserialize_item(item) for item in session_data]
+        self.copy_plugin_configuration(prev_session)
+
+    def copy_plugin_configuration(self, other: "PluginManager"):
+        for item in self.walk_items():
+            for other_item in other.walk_items():
+                if isinstance(item, Plugin) and item.name == other_item.name:
+                    item.enabled = other_item.enabled
+                    item.params = json.dumps(other_item.params).replace(r'"', r"\"")
+                    item.selected_types = other_item.selected_types
+                    item.configs = Plugin.edit_config_from_params(other_item.params, item.configs)
+                elif isinstance(item, Menu) and item.name == other_item.name:
+                    item.enabled = other_item.enabled
+
+        other.disable_all()
+        other.remove_menu()
+        self.refresh_menu()
+        del other
+
+    @staticmethod
+    def remove_menu_by_name(name: str, type: str):
+        try:
+            menus.removeMenu(name, type)
+        except:
+            pass
