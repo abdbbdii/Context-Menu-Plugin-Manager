@@ -63,7 +63,7 @@ def main(page: ft.Page):
             scroll=True,
             spacing=10,
         )
-    
+
     def get_expansion_tiles(item: Menu | Plugin):
         if not (isinstance(item, Menu) or isinstance(item, Plugin)):
             return
@@ -138,8 +138,7 @@ def main(page: ft.Page):
     def get_plugin_config():
         config_column = ft.Column(
             controls=[
-                ft.Text("Configuration", size=20, color=Colors.TEXT_CLR, weight=ft.FontWeight.W_500),
-                ft.Text("Configure the plugin to your liking", size=14, color=Colors.DISABLED_CLR),
+                ft.Text("Plugin Configurations", size=18, color=Colors.TEXT_CLR, weight=ft.FontWeight.W_600),
                 ft.Divider(color=Colors.BACKGROUND2_CLR),
                 ft.Column(
                     controls=[
@@ -156,7 +155,6 @@ def main(page: ft.Page):
                         control := ft.Column(
                             [ft.Checkbox(label=option, value=option in pm.selected_plugin.selected_types, active_color=Colors.LIGHTPRIMARY_CLR) for option in plugin_types],
                         ),
-                        ft.Divider(color=Colors.BACKGROUND2_CLR),
                     ],
                     spacing=15,
                 ),
@@ -169,12 +167,11 @@ def main(page: ft.Page):
 
         if not pm.selected_plugin.configs:
             return config_column
-
         for config in pm.selected_plugin.configs:
+            config_column.controls.append(ft.Divider(color=Colors.BACKGROUND2_CLR))
             container = ft.Column(
                 spacing=15,
             )
-
             container.controls.append(ft.Text(config["label"], size=16, color=Colors.TEXT_CLR))
             container.controls.append(ft.Text(config["description"], size=14, color=Colors.DISABLED_CLR))
             if config["type"] == "str":
@@ -186,8 +183,7 @@ def main(page: ft.Page):
                     max_lines=1,
                     cursor_color=Colors.LIGHTPRIMARY_CLR,
                 )
-                config["control"] = control
-                container.controls.append(control)
+
             elif config["type"] == "bool":
                 control = ft.Switch(
                     value=config["value"] if "value" in config else config["default"],
@@ -196,8 +192,7 @@ def main(page: ft.Page):
                     thumb_color=Colors.PRIMARY_CLR,
                     active_color=Colors.PRIMARY_CLR,
                 )
-                config["control"] = control
-                container.controls.append(control)
+
             elif config["type"] == "int":
                 control = ft.TextField(
                     label=config["label"],
@@ -207,8 +202,7 @@ def main(page: ft.Page):
                     multiline=False,
                     max_lines=1,
                 )
-                config["control"] = control
-                container.controls.append(control)
+
             elif config["type"] == "float":
                 control = ft.TextField(
                     label=config["label"],
@@ -218,14 +212,12 @@ def main(page: ft.Page):
                     multiline=False,
                     max_lines=1,
                 )
-                config["control"] = control
-                container.controls.append(control)
+
             elif config["type"] == "checkbox":
                 control = ft.Column(
                     [ft.Checkbox(label=option, value=option in (config["value"] if "value" in config else config["default"]), active_color=Colors.LIGHTPRIMARY_CLR) for option in config["options"]],
                 )
-                config["control"] = control
-                container.controls.append(control)
+
             elif config["type"] == "radio":
                 control = ft.RadioGroup(
                     content=ft.Column(
@@ -233,11 +225,32 @@ def main(page: ft.Page):
                     ),
                     value=config["value"] if "value" in config else config["default"],
                 )
-                config["control"] = control
-                container.controls.append(control)
+            config["control"] = control
+            container.controls.append(control)
             config_column.controls.append(container)
-            config_column.controls.append(ft.Divider(color=Colors.BACKGROUND2_CLR))
+
         return config_column
+
+    def refresh_config_page():
+        pm.selected_plugin.set_params_from_config()
+        pm.refresh_menu()
+        pm.save_session()
+        page.update()
+
+    def reset_config(e: ft.ControlEvent):
+        for config in pm.selected_plugin.configs:
+            if "value" in config:
+                if config["type"] == "str" or config["type"] == "int" or config["type"] == "float" or config["type"] == "bool":
+                    config["control"].value = config["default"]
+                elif config["type"] == "checkbox":
+                    for control in config["control"].controls:
+                        control.value = control.label in config["default"]
+                elif config["type"] == "radio":
+                    config["control"].value = config["default"]
+
+                del config["value"]
+
+        refresh_config_page()
 
     def save_plugin_configs(e: ft.ControlEvent):
         pm.selected_plugin.selected_types = [control.label for control in pm.selected_plugin.types_control.controls if control.value]
@@ -256,17 +269,8 @@ def main(page: ft.Page):
                 config["value"] = [control.label for control in config["control"].controls if control.value]
             elif config["type"] == "radio":
                 config["value"] = config["control"].value
-        pm.selected_plugin.params = Plugin.get_params_from_config(pm.selected_plugin.configs)
-        pm.refresh_menu()
-        pm.save_session()
-        page.update()
 
-    def load_FAB(e: ft.ControlEvent):
-        if e.control.selected_index == 0:
-            page.floating_action_button.visible = True
-        else:
-            page.floating_action_button.visible = False
-        page.update()
+        refresh_config_page()
 
     page.title = "Context Menu Plugin Manager"
     page.icon = "assets/icon.ico"
@@ -276,21 +280,11 @@ def main(page: ft.Page):
     page.bgcolor = Colors.BACKGROUND1_CLR
     page.window_min_height = 610
     page.window_min_width = 713
-    # page.on_close = lambda e: pm.saveSession()
-    page.floating_action_button = ft.FloatingActionButton(
-        "Save Configurations",
-        icon=ft.Icons.SAVE,
-        tooltip="Save Configurations",
-        bgcolor=Colors.PRIMARY_CLR,
-        visible=False,
-        mini=True,
-        on_click=save_plugin_configs,
-        foreground_color=Colors.TEXT_CLR,
-    )
+
     page.appbar = ft.AppBar(
         title=ft.Row(
             [
-                ft.Text("Context Menu Plugin Manager", size=20, weight=ft.FontWeight.W_400, color=Colors.TEXT_CLR),
+                ft.Text("Context Menu Plugin Manager", size=20, weight=ft.FontWeight.W_600, color=Colors.TEXT_CLR),
                 ft.Container(expand=True),
                 ft.Button("Generate Plugin", icon=ft.Icons.BOLT),
                 ft.Button("Add Plugin", icon=ft.Icons.ADD),
@@ -307,24 +301,21 @@ def main(page: ft.Page):
 
     page.add(
         ft.Row(
-            [
+            controls=[
                 ft.Container(
                     ft.Column(
                         [
                             ft.Row(
                                 [
-                                    ft.Text("Plugins", size=18, weight=ft.FontWeight.W_500),
-                                    ft.Row(
-                                        [
-                                            enable_disable_btn := Component.button("Disable All" if pm.is_all_plugin_enabled() else "Enable All", toggle_all_plugins),
-                                        ],
-                                    ),
+                                    ft.Text("Plugins", size=18, weight=ft.FontWeight.W_600),
+                                    enable_disable_btn := Component.button("Disable All" if pm.is_all_plugin_enabled() else "Enable All", toggle_all_plugins),
                                 ],
                                 height=80,
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             ),
                             expansion_tiles_container := ft.Container(
                                 get_expansion_tiles_container(),
+                                expand=True,
                             ),
                         ],
                         scroll=ft.ScrollMode.ADAPTIVE,
@@ -365,6 +356,7 @@ def main(page: ft.Page):
                                         content=ft.Container(
                                             plugin_markdown := ft.Markdown(
                                                 open(pm.selected_plugin.markdown, "r", encoding="utf-8").read(),
+                                                code_theme=ft.MarkdownCodeTheme.SOLARIZED_DARK,
                                                 extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
                                                 expand=True,
                                             ),
@@ -373,9 +365,23 @@ def main(page: ft.Page):
                                     ),
                                     ft.Tab(
                                         "Configure Plugin",
-                                        plugin_configs := ft.Container(
-                                            get_plugin_config(),
-                                            padding=20,
+                                        content=ft.Column(
+                                            [
+                                                plugin_configs := ft.Container(
+                                                    get_plugin_config(),
+                                                    padding=ft.Padding(20, 20, 20, 0),
+                                                    expand=True,
+                                                ),
+                                                ft.Divider(color=Colors.BACKGROUND2_CLR),
+                                                ft.Row(
+                                                    [
+                                                        Component.button("Save Configurations", save_plugin_configs),
+                                                        Component.button("Reset Configurations", reset_config),
+                                                    ],
+                                                    spacing=20,
+                                                    alignment=ft.MainAxisAlignment.END,
+                                                ),
+                                            ]
                                         ),
                                     ),
                                 ],
@@ -384,7 +390,6 @@ def main(page: ft.Page):
                                 width=1000,
                                 divider_color=Colors.BACKGROUND2_CLR,
                                 label_color=Colors.TEXT_CLR,
-                                on_click=load_FAB,
                                 indicator_color=Colors.PRIMARY_CLR,
                             ),
                         ],

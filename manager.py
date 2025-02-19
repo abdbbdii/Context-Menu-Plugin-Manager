@@ -49,7 +49,6 @@ class Plugin(menus.ContextCommand):
             name=name,
             python=python,
             icon_path=str(icon_path),
-            params=Plugin.get_params_from_config(configs),
         )
         self.id = uuid.uuid4()
         self.name = name
@@ -62,6 +61,9 @@ class Plugin(menus.ContextCommand):
         self.path = path
         self.enabled = enabled
         self.configs = configs
+        self.params = ""
+
+        self.set_params_from_config()
 
     @staticmethod
     def is_plugin_folder(path: Path) -> bool:
@@ -96,23 +98,20 @@ class Plugin(menus.ContextCommand):
             self.selected_types,
         )
 
-    @staticmethod
-    def get_params_from_config(configs: dict[str, Any] | None) -> str:
-        if not configs:
-            return ""
+    def set_params_from_config(self):
+        if not self.configs:
+            self.params = ""
+            return
         params = {}
-        for config in configs:
+        for config in self.configs:
             params[config["name"]] = config["value"] if "value" in config else config["default"]
-        return json.dumps(params).replace(r'"', r"\"")
+        self.params = json.dumps(params).replace(r'"', r"\"")
 
-    @staticmethod
-    def edit_config_from_params(params: dict, configs: dict[str, Any] | None) -> dict[str, Any] | None:
-        if not configs:
+    def update_config_values(self, params: dict):
+        if not self.configs:
             return None
-        for config in configs:
+        for config in self.configs:
             config["value"] = params[config["name"]] if config["name"] in params else None
-        return configs
-
 
 class Menu(menus.ContextMenu):
     def __init__(
@@ -192,7 +191,7 @@ class PluginManager:
         #         menus.FastCommand(plugin, type="FILES", python=plugin.python).compile()
 
     def set_attr(self, id: uuid.UUID, attr: str, value):
-        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
+        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 setattr(plugin, attr, value)
 
@@ -272,17 +271,17 @@ class PluginManager:
             plugin.enabled = True
 
     def get_first_plugin(self) -> Plugin:
-        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
+        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             return plugin
 
     def select_plugin(self, id: uuid.UUID):
-        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
+        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 self.selected_plugin = plugin
                 return plugin
 
     def refresh_menu(self):
-        expanded_items = self.get_expand_types(filter=lambda x: x.enabled == True)
+        expanded_items = self.get_expand_types()
         for item in expanded_items:
             if isinstance(item, Menu):
                 try:
@@ -295,25 +294,25 @@ class PluginManager:
                 item.compile()
 
     def is_all_plugin_enabled(self):
-        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
+        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if not plugin.enabled:
                 return False
         return True
 
     def is_all_plugin_disabled(self):
-        for plugin in self.walk_items(filter_type=PluginManager.ItemType.PLUGIN):
+        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.enabled:
                 return False
         return True
 
-    def walk_items(self, filter_type: Any | None = None):
+    def walk_items(self, walk_only: Any | None = None):
         if not self.items:
             return
         for item in self.items:
-            if filter_type is None or isinstance(item, filter_type):
+            if walk_only is None or isinstance(item, walk_only):
                 yield item
             if isinstance(item, Menu):
-                yield from PluginManager.__walk_items(item, filter_type)
+                yield from PluginManager.__walk_items(item, walk_only)
 
     def __walk_items(menu: Menu, walk_only: Any | None = None):
         for item in menu.sub_items:
@@ -326,7 +325,7 @@ class PluginManager:
         def serialize_item(item):
             if isinstance(item, Plugin):
                 return {
-                    "instance": "Plugin",
+                    "class": "Plugin",
                     "name": item.name,
                     "params": json.loads(item.params.replace(r"\"", r'"')) if item.params else {},
                     "enabled": item.enabled,
@@ -334,7 +333,7 @@ class PluginManager:
                 }
             elif isinstance(item, Menu):
                 return {
-                    "instance": "Menu",
+                    "class": "Menu",
                     "name": item.name,
                     "enabled": item.enabled,
                     "sub_items": [serialize_item(child) for child in item.sub_items],
@@ -347,13 +346,13 @@ class PluginManager:
 
     def load_session(self):
         def deserialize_item(data):
-            if data["instance"] == "Plugin":
+            if data["class"] == "Plugin":
                 plugin = Plugin(name=data["name"])
                 plugin.enabled = data["enabled"]
                 plugin.params = data["params"]
                 plugin.selected_types = data["selected_types"]
                 return plugin
-            elif data["instance"] == "Menu":
+            elif data["class"] == "Menu":
                 menu = Menu(name=data["name"])
                 menu.enabled = data["enabled"]
                 menu.sub_items = [deserialize_item(child) for child in data["sub_items"]]
@@ -375,7 +374,7 @@ class PluginManager:
                     item.enabled = other_item.enabled
                     item.params = json.dumps(other_item.params).replace(r'"', r"\"")
                     item.selected_types = other_item.selected_types
-                    item.configs = Plugin.edit_config_from_params(other_item.params, item.configs)
+                    item.update_config_values(other_item.params)
                 elif isinstance(item, Menu) and item.name == other_item.name:
                     item.enabled = other_item.enabled
 
