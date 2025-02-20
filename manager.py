@@ -12,13 +12,15 @@ from context_menu import menus
 ROOT = Path(__file__).parent.resolve()
 PLUGINS_DIR = ROOT / "plugins"
 os.makedirs(PLUGINS_DIR, exist_ok=True)
+TEMP_DIR = ROOT / "temp"
+os.makedirs(TEMP_DIR, exist_ok=True)
 ASSETS_DIR = ROOT / "assets"
-os.makedirs(PLUGINS_DIR, exist_ok=True)
-THEME_DIR = ROOT / "assets" / "themes"
-os.makedirs(PLUGINS_DIR, exist_ok=True)
+os.makedirs(ASSETS_DIR, exist_ok=True)
+THEMES_DIR = ROOT / "assets" / "themes"
+os.makedirs(THEMES_DIR, exist_ok=True)
 SESSION_FILE = ROOT / "session.json"
-# DOT_ENV = ROOT / ".env"
 PLUGIN_TYPES = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"]
+# DOT_ENV = ROOT / ".env"
 
 
 def driver_decorator(func: FunctionType) -> FunctionType:
@@ -170,6 +172,19 @@ class PluginManager:
         self.selected_plugin: Plugin | None = self.get_first_plugin()
         self.previous_plugin: Plugin | None = None
         self.load_session()
+    
+    @staticmethod
+    def check_path(path: Path | str):
+        try:
+            temp_pm = PluginManager(TEMP_DIR, no_setup=True)
+            temp_pm.get_from_path(path)
+            if not len(temp_pm.items):
+                return False
+            temp_pm.get_expand_types()
+        except Exception as e:
+            print(e)
+            return False
+        return True
 
     class ItemType:
         MENU = Menu
@@ -177,8 +192,7 @@ class PluginManager:
 
     def get_from_path(self, path: Path | str):
         path = Path(path).resolve()
-        if not os.path.exists(path) or not os.path.isdir(path):
-            print(f"The directory '{path}' does not exist.")
+        if not path.exists() or not path.is_dir():
             return
 
         items = os.listdir(path)
@@ -200,6 +214,13 @@ class PluginManager:
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 setattr(plugin, attr, value)
+
+    def reload_plugins(self):
+        self.items = []
+        self.get_from_path(PLUGINS_DIR)
+        self.selected_plugin: Plugin | None = self.get_first_plugin()
+        self.previous_plugin: Plugin | None = None
+        self.load_session()
 
     @staticmethod
     def add_path_items(menu: Menu | Plugin, path: Path):
@@ -390,7 +411,6 @@ class PluginManager:
         other.remove_menu()
         self.refresh_menu()
         self.save_session()
-        del other
 
     @staticmethod
     def remove_menu_by_name(name: str, type: str):
