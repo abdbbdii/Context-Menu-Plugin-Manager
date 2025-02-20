@@ -31,13 +31,30 @@ class Colors:
 
 class Component:
     def button(text, on_click):
-        return ft.FilledButton(text=text, on_click=on_click, style=ft.ButtonStyle(bgcolor=Colors.PRIMARY_CLR, color=Colors.TEXT_CLR, padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)), height=30)
+        return ft.FilledButton(
+            text=text,
+            on_click=on_click,
+            style=ft.ButtonStyle(bgcolor=Colors.PRIMARY_CLR, color=Colors.TEXT_CLR, padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)),
+            height=30,
+        )
 
     def dlg_ask_input_btn(title, content, options: dict, show_input_field=False, max_lines=1):
         return ft.AlertDialog(
             modal=True,
             title=ft.Text(title),
-            content=ft.TextField(label=content, multiline=True, max_lines=max_lines, border_color=Colors.LIGHTPRIMARY_CLR, border_width=2, autofocus=True, width=500) if show_input_field else ft.Text(content),
+            content=(
+                ft.TextField(
+                    label=content,
+                    multiline=True,
+                    max_lines=max_lines,
+                    border_color=Colors.LIGHTPRIMARY_CLR,
+                    border_width=2,
+                    autofocus=True,
+                    width=500,
+                )
+                if show_input_field
+                else ft.Text(content)
+            ),
             actions=[
                 *[ft.TextButton(text, on_click=on_click, style=ft.ButtonStyle(color=Colors.TEXT_CLR)) for text, on_click in options.items()],
             ],
@@ -54,7 +71,7 @@ def main(page: ft.Page):
             controls=[
                 ft.Container(
                     content=get_expansion_tiles(plugin),
-                    padding=20,
+                    padding=15,
                     bgcolor=Colors.BACKGROUND2_CLR,
                     border_radius=5,
                 )
@@ -68,34 +85,57 @@ def main(page: ft.Page):
         if not (isinstance(item, Menu) or isinstance(item, Plugin)):
             return
         if isinstance(item, Plugin):
-            return ft.Container(
+            plugin_tile = ft.CupertinoButton(
                 content=ft.Row(
                     controls=[
                         ft.Image(item.icon_path, width=40, height=40, border_radius=10),
-                        ft.CupertinoButton(item.name, color="#ffffff", expand=True, alignment=ft.alignment.center_left, on_click=change_plugin_page, data=item),
+                        ft.Column(
+                            [
+                                ft.Text(item.name, size=16, color=Colors.TEXT_CLR, overflow=ft.TextOverflow.ELLIPSIS),
+                                ft.Text(item.description, size=14, color=Colors.DISABLED_CLR, overflow=ft.TextOverflow.ELLIPSIS),
+                            ],
+                            spacing=2,
+                            alignment=ft.alignment.center_left,
+                            expand=True,
+                            scroll=ft.ScrollMode.ADAPTIVE,
+                        ),
                         ft.Switch(value=item.enabled, inactive_track_color=Colors.BACKGROUND2_CLR, track_outline_color=Colors.PRIMARY_CLR, thumb_color=Colors.PRIMARY_CLR, active_color=Colors.PRIMARY_CLR, data=item.id, on_change=toggle_plugin),
                     ],
                     height=60,
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                border_radius=5,
                 bgcolor=Colors.BACKGROUND4_CLR if pm.selected_plugin.id == item.id else None,
+                border_radius=5,
+                padding=ft.padding.Padding(10, 5, 10, 5),
+                expand=True,
+                alignment=ft.alignment.center_left,
+                on_click=change_plugin_page,
+                data=item,
             )
+            item.control = plugin_tile
+            return plugin_tile
 
-        et_child = ft.ExpansionTile(
+        menu_tile = ft.ExpansionTile(
             title=ft.Text(item.name, size=20),
-            controls_padding=ft.padding.Padding(30, 0, 0, 0),
-            tile_padding=0,
-            shape=ft.RoundedRectangleBorder(radius=10),
-            collapsed_shape=ft.RoundedRectangleBorder(radius=10),
-            maintain_state=True,
             subtitle=ft.Text(item.description, size=14, color=Colors.DISABLED_CLR),
+            leading=ft.Image(item.icon_path, width=40, height=40, border_radius=10),
+            controls=[
+                ft.Container(
+                    ft.Column(
+                        [get_expansion_tiles(sub_item) for sub_item in item.sub_items],
+                        spacing=5,
+                    ),
+                    border=ft.Border(left=ft.BorderSide(color=Colors.BACKGROUND4_CLR, width=2)),
+                    padding=ft.padding.Padding(15, 5, 0, 5),
+                ),
+            ],
+            tile_padding=ft.padding.Padding(10, 5, 10, 5),
+            shape=ft.RoundedRectangleBorder(radius=5),
+            maintain_state=True,
             initially_expanded=True,
         )
-
-        for item in item.get_sub_items():
-            et_child.controls.append(get_expansion_tiles(item))
-        return et_child
+        item.control = menu_tile
+        return menu_tile
 
     def change_plugin_page(e: ft.ControlEvent):
         pm.select_plugin(e.control.data.id)
@@ -104,7 +144,8 @@ def main(page: ft.Page):
         plugin_description.value = pm.selected_plugin.description
         plugin_markdown.value = open(pm.selected_plugin.markdown, "r", encoding="utf-8").read()
         plugin_configs.content = get_plugin_config()
-        expansion_tiles_container.content = get_expansion_tiles_container()
+        pm.previous_plugin.control.bgcolor = None
+        pm.selected_plugin.control.bgcolor = Colors.BACKGROUND4_CLR
         page.update()
 
     def toggle_plugin(e: ft.ControlEvent):
@@ -123,15 +164,15 @@ def main(page: ft.Page):
 
     def toggle_all_plugins(e: ft.ControlEvent):
         value: bool = e.control.text == "Enable All"
-        for plugin in pm.walk_plugin():
+        for plugin in pm.walk_items(Plugin):
             plugin.enabled = value
+            plugin.control.content.controls[2].value = value
         if value:
             pm.create_menu()
             enable_disable_btn.text = "Disable All"
         else:
             pm.remove_menu()
             enable_disable_btn.text = "Enable All"
-        expansion_tiles_container.content = get_expansion_tiles_container()
         pm.save_session()
         page.update()
 
@@ -313,12 +354,14 @@ def main(page: ft.Page):
                                 height=80,
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             ),
-                            expansion_tiles_container := ft.Container(
-                                get_expansion_tiles_container(),
+                            ft.Column(
+                                [
+                                    get_expansion_tiles_container(),
+                                ],
+                                scroll=ft.ScrollMode.ADAPTIVE,
                                 expand=True,
                             ),
                         ],
-                        scroll=ft.ScrollMode.ADAPTIVE,
                     ),
                     bgcolor=Colors.BACKGROUND1_CLR,
                     padding=ft.Padding(20, 0, 20, 20),
@@ -354,11 +397,16 @@ def main(page: ft.Page):
                                     ft.Tab(
                                         text="Description",
                                         content=ft.Container(
-                                            plugin_markdown := ft.Markdown(
-                                                open(pm.selected_plugin.markdown, "r", encoding="utf-8").read(),
-                                                code_theme=ft.MarkdownCodeTheme.SOLARIZED_DARK,
-                                                extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                                            ft.Column(
+                                                [
+                                                    plugin_markdown := ft.Markdown(
+                                                        open(pm.selected_plugin.markdown, "r", encoding="utf-8").read(),
+                                                        code_theme=ft.MarkdownCodeTheme.SOLARIZED_DARK,
+                                                        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                                                    ),
+                                                ],
                                                 expand=True,
+                                                scroll=ft.ScrollMode.ADAPTIVE,
                                             ),
                                             padding=20,
                                         ),

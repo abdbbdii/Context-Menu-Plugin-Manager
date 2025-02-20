@@ -86,7 +86,7 @@ class Plugin(menus.ContextCommand):
             supported_types=plugin_json["supported_types"],
             configs=plugin_json["configs"] if "configs" in plugin_json else None,
             python=module.driver,
-            enabled=True,
+            enabled=False,
             path=path,
         )
 
@@ -113,6 +113,7 @@ class Plugin(menus.ContextCommand):
         for config in self.configs:
             config["value"] = params[config["name"]] if config["name"] in params else None
 
+
 class Menu(menus.ContextMenu):
     def __init__(
         self,
@@ -122,13 +123,13 @@ class Menu(menus.ContextMenu):
         icon_path: Path | str | None = None,
     ):
         self.id = uuid.uuid4()
-        self.name = name
-        self.description = description
+        self.name: str = name
+        self.description: str | None = description
         self.icon_path = str(icon_path)
         self.sub_items: list[menus.ItemType] = []
-        self.path = path
-        self.type = None
-        self.enabled = False
+        self.path: Path | None = path
+        self.type: Literal["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"] | None = None
+        self.enabled: bool = False
         super().__init__(
             name=name,
             type=None,
@@ -163,6 +164,7 @@ class PluginManager:
             return
         self.get_from_path(path)
         self.selected_plugin: Plugin | None = self.get_first_plugin()
+        self.previous_plugin: Plugin | None = None
         self.load_session()
 
     class ItemType:
@@ -262,6 +264,19 @@ class PluginManager:
                 except:
                     pass
 
+    def refresh_menu(self):
+        expanded_items = self.get_expand_types()
+        for item in expanded_items:
+            if isinstance(item, Menu):
+                try:
+                    menus.removeMenu(item.name, item.type)
+                except:
+                    pass
+        expanded_items = self.get_expand_types(filter=lambda x: x.enabled == True)
+        for item in expanded_items:
+            if isinstance(item, Menu):
+                item.compile()
+
     def disable_all(self):
         for plugin in self.walk_items():
             plugin.enabled = False
@@ -277,21 +292,10 @@ class PluginManager:
     def select_plugin(self, id: uuid.UUID):
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
-                self.selected_plugin = plugin
+                if self.selected_plugin.id != plugin.id:
+                    self.previous_plugin = self.selected_plugin
+                    self.selected_plugin = plugin
                 return plugin
-
-    def refresh_menu(self):
-        expanded_items = self.get_expand_types()
-        for item in expanded_items:
-            if isinstance(item, Menu):
-                try:
-                    menus.removeMenu(item.name, item.type)
-                except:
-                    pass
-        expanded_items = self.get_expand_types(filter=lambda x: x.enabled == True)
-        for item in expanded_items:
-            if isinstance(item, Menu):
-                item.compile()
 
     def is_all_plugin_enabled(self):
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
@@ -381,6 +385,7 @@ class PluginManager:
         other.disable_all()
         other.remove_menu()
         self.refresh_menu()
+        self.save_session()
         del other
 
     @staticmethod
