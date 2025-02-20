@@ -1,16 +1,21 @@
 {
-    "bg": "#191622",
-    "bg-selection": "#201b2d",
-    "bg-low": "#13111b",
-    "bg-low-selection": "#1e1d27",
-    "bg-low-hover": "#25242f",
-    "bg-high": "#201b2d",
-    "bg-high-selection": "#2d2a39",
-    "bg-high-hover": "#2d2a39",
-    "primary": "#5a4b81",
-    "secondary": "#ff79c6",
-    "tertiary": "#88d7e5",
-    "text": "#e1e1e6",
-    "text-muted": "#a9a9af",
-    "divider": "#302d37"
+    "name": "Omen",
+    "description": "A dark theme inspired by the Omen brand.",
+    "palette": {
+        "bg": "#191622",
+        "bg-selection": "#201b2d",
+        "bg-low": "#13111b",
+        "bg-low-selection": "#1e1d27",
+        "bg-low-hover": "#25242f",
+        "bg-high": "#201b2d",
+        "bg-high-selection": "#282435",
+        "bg-high-hover": "#2d2a39",
+        "primary": "#5a4b81",
+        "secondary": "#ff79c6",
+        "tertiary": "#88d7e5",
+        "text": "#e1e1e6",
+        "text-muted": "#a9a9af",
+        "divider": "#302d37",
+        "divider-alt": "#ff79c6"
+    }
 }

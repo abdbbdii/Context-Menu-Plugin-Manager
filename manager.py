@@ -9,12 +9,16 @@ from importlib.util import spec_from_file_location, module_from_spec
 from context_menu import menus
 
 
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).parent.resolve()
 PLUGINS_DIR = ROOT / "plugins"
+os.makedirs(PLUGINS_DIR, exist_ok=True)
 ASSETS_DIR = ROOT / "assets"
-SESSION_FILE = ROOT / "record.json"
-DOT_ENV = ROOT / ".env"
-plugin_types = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"]
+os.makedirs(PLUGINS_DIR, exist_ok=True)
+THEME_DIR = ROOT / "assets" / "themes"
+os.makedirs(PLUGINS_DIR, exist_ok=True)
+SESSION_FILE = ROOT / "session.json"
+# DOT_ENV = ROOT / ".env"
+PLUGIN_TYPES = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"]
 
 
 def driver_decorator(func: FunctionType) -> FunctionType:
@@ -228,7 +232,7 @@ class PluginManager:
         expanded_plugins = []
         for plugin in self.items:
             if isinstance(plugin, Menu):
-                for type in plugin_types:
+                for type in PLUGIN_TYPES:
                     new_menu = Menu(name=plugin.name, description=plugin.description, icon_path=plugin.icon_path, path=plugin.path)
                     new_menu.type = type
                     PluginManager.__expand_menu_types(new_menu, plugin, type, filter)

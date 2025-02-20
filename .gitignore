@@ -4,6 +4,6 @@ cache
 .venv
 .vs
 .vscode
-record.json*
+session.json*
 tempCodeRunnerFile.*
 *.old

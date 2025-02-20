@@ -1,11 +1,13 @@
 import os
+from pathlib import Path
+import json
+from typing import Callable
 
 import flet as ft
 
 from manager import *
 
 
-pm = PluginManager("plugins")
 # all_installed = False
 # while not all_installed:
 #     try:
@@ -16,63 +18,194 @@ pm = PluginManager("plugins")
 #         all_installed = True
 
 
-class Colors:
-    PRIMARY_CLR = "#468189"
-    SECONDARY_CLR = "#c9bfa5"
-    LIGHTPRIMARY_CLR = "#468189"
-    BACKGROUND0_CLR = "#031926"
-    BACKGROUND1_CLR = "#042131"
-    BACKGROUND2_CLR = "#052a3f"
-    BACKGROUND3_CLR = "#052d44"
-    BACKGROUND4_CLR = "#06334d"
-    DISABLED_CLR = "#acacac"
-    TEXT_CLR = "#ffffff"
+class Palette:
+    def __init__(self, palette: dict):
+        self.bg = palette["bg"]
+        self.bg_selection = palette["bg-selection"]
+        self.bg_low = palette["bg-low"]
+        self.bg_low_selection = palette["bg-low-selection"]
+        self.bg_low_hover = palette["bg-low-hover"]
+        self.bg_high = palette["bg-high"]
+        self.bg_high_selection = palette["bg-high-selection"]
+        self.bg_high_hover = palette["bg-high-hover"]
+        self.primary = palette["primary"]
+        self.secondary = palette["secondary"]
+        self.tertiary = palette["tertiary"]
+        self.text = palette["text"]
+        self.text_muted = palette["text-muted"]
+        self.divider = palette["divider"]
+        self.divider_alt = palette["divider-alt"]
 
 
-class Component:
-    def button(text, on_click):
-        return ft.FilledButton(
-            text=text,
-            on_click=on_click,
-            style=ft.ButtonStyle(bgcolor=Colors.PRIMARY_CLR, color=Colors.TEXT_CLR, padding=ft.padding.Padding(10, 5, 10, 5), shape=ft.RoundedRectangleBorder(radius=5)),
-            height=30,
-        )
-
-    def dlg_ask_input_btn(title, content, options: dict, show_input_field=False, max_lines=1):
-        return ft.AlertDialog(
-            modal=True,
-            title=ft.Text(title),
-            content=(
-                ft.TextField(
-                    label=content,
-                    multiline=True,
-                    max_lines=max_lines,
-                    border_color=Colors.LIGHTPRIMARY_CLR,
-                    border_width=2,
-                    autofocus=True,
-                    width=500,
-                )
-                if show_input_field
-                else ft.Text(content)
-            ),
-            actions=[
-                *[ft.TextButton(text, on_click=on_click, style=ft.ButtonStyle(color=Colors.TEXT_CLR)) for text, on_click in options.items()],
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor=Colors.BACKGROUND1_CLR,
-            open=True,
-            shape=ft.RoundedRectangleBorder(radius=10),
-        )
+class Theme:
+    def __init__(self, theme: dict):
+        self.name = theme["name"]
+        self.palette = Palette(theme["palette"])
 
 
-def main(page: ft.Page):
+class Themes:
+    def __init__(self, path: Path = THEME_DIR):
+        self.themes: list[Theme] = []
+        self.load_themes(path)
+        self.theme = self.themes[0]
+
+    def load_themes(self, path: Path):
+        for theme in os.listdir(path):
+            if not theme.endswith(".json"):
+                continue
+            with open(path / theme, "r") as f:
+                self.themes.append(Theme(json.load(f)))
+
+    def select_theme(self, theme_name: str):
+        for theme in self.themes:
+            if theme.name == theme_name:
+                self.theme = theme
+                break
+
+
+class cft:
+    class Button(ft.Button):
+        def __init__(self, text: str | None = None, content: ft.Control | None = None, on_click: Callable = None, icon: ft.Icon = None):
+            super().__init__(
+                style=ft.ButtonStyle(
+                    bgcolor={
+                        ft.ControlState.HOVERED: te.theme.palette.bg_high_hover,
+                        ft.ControlState.DEFAULT: te.theme.palette.bg_high_selection,
+                    },
+                    padding=ft.Padding(10, 5, 10, 5),
+                    shape=ft.RoundedRectangleBorder(radius=5),
+                    elevation=0,
+                    color=te.theme.palette.text,
+                ),
+                text=text,
+                icon=icon,
+                content=content,
+                on_click=on_click,
+                icon_color=te.theme.palette.text,
+            )
+
+    class Divider(ft.Divider):
+        def __init__(self, alt=False, thickness=1):
+            super().__init__(color=te.theme.palette.divider_alt if alt else te.theme.palette.divider, thickness=thickness)
+
+    class Switch(ft.Switch):
+        def __init__(self, value: bool | None = None, on_change: Callable | None = None, data: Any | None = None):
+            super().__init__(
+                value=value,
+                inactive_track_color=te.theme.palette.bg,
+                track_outline_color={
+                    ft.ControlState.SELECTED: ft.Colors.TRANSPARENT,
+                    ft.ControlState.DEFAULT: te.theme.palette.bg_high_hover,
+                },
+                thumb_color={
+                    ft.ControlState.SELECTED: te.theme.palette.primary,
+                    ft.ControlState.DEFAULT: te.theme.palette.bg_high_hover,
+                },
+                active_color=te.theme.palette.primary,
+                data=data,
+                on_change=on_change,
+            )
+
+    class TextField(ft.TextField):
+        def __init__(self, label: str | None = None, value: str | None = None, multiline: bool = False, max_lines: int = 1, on_change: Callable | None = None, input_filter: ft.InputFilter | None = None):
+            super().__init__(
+                label=label,
+                value=value,
+                multiline=multiline,
+                max_lines=max_lines,
+                border_color=te.theme.palette.divider,
+                on_change=on_change,
+                cursor_color=te.theme.palette.primary,
+                focused_border_color=te.theme.palette.primary,
+                label_style=ft.TextStyle(color=te.theme.palette.text),
+                input_filter=input_filter,
+            )
+
+    class Checkbox(ft.Checkbox):
+        def __init__(self, label: str | None = None, value: bool = False):
+            super().__init__(
+                label=label,
+                value=value,
+                active_color=te.theme.palette.primary,
+                check_color=ft.Colors.BLACK,
+            )
+
+    class Radio(ft.Radio):
+        def __init__(self, label: str | None = None, value: str | None = None):
+            super().__init__(
+                label=label,
+                value=value,
+                active_color=te.theme.palette.primary,
+            )
+
+    class Text(ft.Text):
+        class Size:
+            LARGE = 20
+            MEDIUM = 16
+            SMALL = 14
+            TINY = 12
+
+        def __init__(self, text: str | None = None, overflow: ft.TextOverflow = None, dimmed=False, size: Size = Size.MEDIUM):
+            super().__init__(value=text, size=size, color=te.theme.palette.text_muted if dimmed else te.theme.palette.text, overflow=overflow)
+
+    class Dialog(ft.AlertDialog):
+        def __init__(
+            self,
+            title: str | None = None,
+            subtitle: str | None = None,
+            content: ft.Control | None = None,
+            actions: dict[str, Callable] | None = None,
+            on_dismiss: Callable | None = None,
+            get_callback: Callable | None = None,
+        ):
+            super().__init__(
+                modal=True,
+                title=ft.Column(
+                    [
+                        cft.Text(title, size=cft.Text.Size.LARGE),
+                        cft.Text(subtitle, dimmed=True, size=cft.Text.Size.SMALL),
+                    ],
+                    spacing=5,
+                ),
+                content=content,
+                actions=[
+                    *[cft.Button(text, on_click=on_click if on_click else self.close_dialog) for text, on_click in actions.items()],
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+                bgcolor=te.theme.palette.bg,
+                shape=ft.RoundedRectangleBorder(radius=5),
+                on_dismiss=on_dismiss,
+            )
+            self.get_callback = get_callback
+
+        def show(self, page: ft.Page):
+            page.open(self)
+
+        def close_dialog(self, e: ft.ControlEvent):
+            e.page.close(e.control.parent)
+            self.get_callback(e.control.text) if self.get_callback else None
+
+
+def main(page: ft.Page, pm: PluginManager, th: Themes):
+    def generate_plugin(e: ft.ControlEvent):
+        # check if key is valid and if not then do this:
+        cft.Dialog(
+            "Enter the key",
+            "Enter the key to generate the plugin",
+            cft.TextField(label="Key", multiline=False, max_lines=1),
+            {
+                "Generate": lambda e: print("Generate"),
+                "Cancel": None,
+            },
+        ).show(page)
+
     def get_expansion_tiles_container():
         return ft.Column(
             controls=[
                 ft.Container(
                     content=get_expansion_tiles(plugin),
                     padding=15,
-                    bgcolor=Colors.BACKGROUND2_CLR,
+                    bgcolor=th.theme.palette.bg,
                     border_radius=5,
                 )
                 for plugin in pm.items
@@ -85,30 +218,35 @@ def main(page: ft.Page):
         if not (isinstance(item, Menu) or isinstance(item, Plugin)):
             return
         if isinstance(item, Plugin):
-            plugin_tile = ft.CupertinoButton(
+            plugin_tile = ft.Button(
                 content=ft.Row(
                     controls=[
                         ft.Image(item.icon_path, width=40, height=40, border_radius=10),
                         ft.Column(
                             [
-                                ft.Text(item.name, size=16, color=Colors.TEXT_CLR, overflow=ft.TextOverflow.ELLIPSIS),
-                                ft.Text(item.description, size=14, color=Colors.DISABLED_CLR, overflow=ft.TextOverflow.ELLIPSIS),
+                                cft.Text(item.name, overflow=ft.TextOverflow.ELLIPSIS, size=cft.Text.Size.SMALL),
+                                cft.Text(item.description, overflow=ft.TextOverflow.ELLIPSIS, dimmed=True, size=cft.Text.Size.TINY),
                             ],
                             spacing=2,
                             alignment=ft.alignment.center_left,
                             expand=True,
                             scroll=ft.ScrollMode.ADAPTIVE,
                         ),
-                        ft.Switch(value=item.enabled, inactive_track_color=Colors.BACKGROUND2_CLR, track_outline_color=Colors.PRIMARY_CLR, thumb_color=Colors.PRIMARY_CLR, active_color=Colors.PRIMARY_CLR, data=item.id, on_change=toggle_plugin),
+                        cft.Switch(value=item.enabled, on_change=toggle_plugin, data=item.id),
                     ],
                     height=60,
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                bgcolor=Colors.BACKGROUND4_CLR if pm.selected_plugin.id == item.id else None,
-                border_radius=5,
-                padding=ft.padding.Padding(10, 5, 10, 5),
+                style=ft.ButtonStyle(
+                    bgcolor={
+                        ft.ControlState.HOVERED: th.theme.palette.bg_selection,
+                        ft.ControlState.FOCUSED: th.theme.palette.bg_selection,
+                        ft.ControlState.DEFAULT: th.theme.palette.bg_selection if pm.selected_plugin.id == item.id else th.theme.palette.bg,
+                    },
+                    shape=ft.RoundedRectangleBorder(radius=5),
+                    elevation=0,
+                ),
                 expand=True,
-                alignment=ft.alignment.center_left,
                 on_click=change_plugin_page,
                 data=item,
             )
@@ -116,8 +254,8 @@ def main(page: ft.Page):
             return plugin_tile
 
         menu_tile = ft.ExpansionTile(
-            title=ft.Text(item.name, size=20),
-            subtitle=ft.Text(item.description, size=14, color=Colors.DISABLED_CLR),
+            title=cft.Text(item.name, size=cft.Text.Size.SMALL),
+            subtitle=cft.Text(item.description, dimmed=True, size=cft.Text.Size.TINY),
             leading=ft.Image(item.icon_path, width=40, height=40, border_radius=10),
             controls=[
                 ft.Container(
@@ -125,7 +263,7 @@ def main(page: ft.Page):
                         [get_expansion_tiles(sub_item) for sub_item in item.sub_items],
                         spacing=5,
                     ),
-                    border=ft.Border(left=ft.BorderSide(color=Colors.BACKGROUND4_CLR, width=2)),
+                    border=ft.Border(left=ft.BorderSide(color=th.theme.palette.divider, width=2)),
                     padding=ft.padding.Padding(15, 5, 0, 5),
                 ),
             ],
@@ -133,6 +271,7 @@ def main(page: ft.Page):
             shape=ft.RoundedRectangleBorder(radius=5),
             maintain_state=True,
             initially_expanded=True,
+            icon_color=th.theme.palette.text,
         )
         item.control = menu_tile
         return menu_tile
@@ -144,8 +283,8 @@ def main(page: ft.Page):
         plugin_description.value = pm.selected_plugin.description
         plugin_markdown.value = open(pm.selected_plugin.markdown, "r", encoding="utf-8").read()
         plugin_configs.content = get_plugin_config()
-        pm.previous_plugin.control.bgcolor = None
-        pm.selected_plugin.control.bgcolor = Colors.BACKGROUND4_CLR
+        pm.previous_plugin.control.style.bgcolor[ft.ControlState.DEFAULT] = th.theme.palette.bg
+        e.control.style.bgcolor[ft.ControlState.DEFAULT] = th.theme.palette.bg_selection
         page.update()
 
     def toggle_plugin(e: ft.ControlEvent):
@@ -179,22 +318,14 @@ def main(page: ft.Page):
     def get_plugin_config():
         config_column = ft.Column(
             controls=[
-                ft.Text("Plugin Configurations", size=18, color=Colors.TEXT_CLR, weight=ft.FontWeight.W_600),
-                ft.Divider(color=Colors.BACKGROUND2_CLR),
+                cft.Text("Plugin Configurations", size=cft.Text.Size.LARGE),
+                cft.Divider(),
                 ft.Column(
                     controls=[
-                        ft.Text(
-                            "Change Plugin Type",
-                            size=16,
-                            color=Colors.TEXT_CLR,
-                        ),
-                        ft.Text(
-                            "Only change the plugin type if you know what you are doing",
-                            size=14,
-                            color=Colors.DISABLED_CLR,
-                        ),
+                        cft.Text("Change Plugin Type", size=cft.Text.Size.MEDIUM),
+                        cft.Text("Only change the plugin type if you know what you are doing", dimmed=True, size=cft.Text.Size.SMALL),
                         control := ft.Column(
-                            [ft.Checkbox(label=option, value=option in pm.selected_plugin.selected_types, active_color=Colors.LIGHTPRIMARY_CLR) for option in plugin_types],
+                            [cft.Checkbox(label=option, value=option in pm.selected_plugin.selected_types) for option in PLUGIN_TYPES],
                         ),
                     ],
                     spacing=15,
@@ -209,60 +340,28 @@ def main(page: ft.Page):
         if not pm.selected_plugin.configs:
             return config_column
         for config in pm.selected_plugin.configs:
-            config_column.controls.append(ft.Divider(color=Colors.BACKGROUND2_CLR))
-            container = ft.Column(
-                spacing=15,
-            )
-            container.controls.append(ft.Text(config["label"], size=16, color=Colors.TEXT_CLR))
-            container.controls.append(ft.Text(config["description"], size=14, color=Colors.DISABLED_CLR))
+            config_column.controls.append(cft.Divider())
+            container = ft.Column(spacing=15)
+            container.controls.append(cft.Text(config["label"], size=cft.Text.Size.MEDIUM))
+            container.controls.append(cft.Text(config["description"], dimmed=True, size=cft.Text.Size.SMALL))
             if config["type"] == "str":
-                control = ft.TextField(
-                    label=config["label"],
-                    value=config["value"] if "value" in config else config["default"],
-                    border_color=Colors.LIGHTPRIMARY_CLR,
-                    multiline=False,
-                    max_lines=1,
-                    cursor_color=Colors.LIGHTPRIMARY_CLR,
-                )
-
+                control = cft.TextField(label=config["label"], value=config["value"] if "value" in config else config["default"])
             elif config["type"] == "bool":
-                control = ft.Switch(
-                    value=config["value"] if "value" in config else config["default"],
-                    inactive_track_color=Colors.BACKGROUND2_CLR,
-                    track_outline_color=Colors.PRIMARY_CLR,
-                    thumb_color=Colors.PRIMARY_CLR,
-                    active_color=Colors.PRIMARY_CLR,
-                )
+                control = cft.Switch(value=config["value"] if "value" in config else config["default"])
 
             elif config["type"] == "int":
-                control = ft.TextField(
-                    label=config["label"],
-                    value=config["value"] if "value" in config else config["default"],
-                    border_color=Colors.LIGHTPRIMARY_CLR,
-                    input_filter=ft.NumbersOnlyInputFilter(),
-                    multiline=False,
-                    max_lines=1,
-                )
+                control = cft.TextField(label=config["label"], value=config["value"] if "value" in config else config["default"], input_filter=ft.NumbersOnlyInputFilter())
 
             elif config["type"] == "float":
-                control = ft.TextField(
-                    label=config["label"],
-                    value=config["value"] if "value" in config else config["default"],
-                    border_color=Colors.LIGHTPRIMARY_CLR,
-                    input_filter=ft.InputFilter("^[0-9]*[.]?[0-9]*$"),
-                    multiline=False,
-                    max_lines=1,
-                )
+                control = cft.TextField(label=config["label"], value=config["value"] if "value" in config else config["default"], input_filter=ft.InputFilter("^[0-9]*[.]?[0-9]*$"))
 
             elif config["type"] == "checkbox":
-                control = ft.Column(
-                    [ft.Checkbox(label=option, value=option in (config["value"] if "value" in config else config["default"]), active_color=Colors.LIGHTPRIMARY_CLR) for option in config["options"]],
-                )
+                control = ft.Column([cft.Checkbox(label=option, value=option in (config["value"] if "value" in config else config["default"])) for option in config["options"]])
 
             elif config["type"] == "radio":
                 control = ft.RadioGroup(
                     content=ft.Column(
-                        [ft.Radio(value=option, label=option, fill_color=Colors.LIGHTPRIMARY_CLR) for option in config["options"]],
+                        [cft.Radio(value=option, label=option) for option in config["options"]],
                     ),
                     value=config["value"] if "value" in config else config["default"],
                 )
@@ -318,26 +417,26 @@ def main(page: ft.Page):
     page.fonts = {"Inter": "Inter[slnt,wght].ttf"}
     page.theme = ft.Theme(font_family="Inter")
     page.padding = 0
-    page.bgcolor = Colors.BACKGROUND1_CLR
+    page.bgcolor = th.theme.palette.bg_low
     page.window_min_height = 610
     page.window_min_width = 713
 
     page.appbar = ft.AppBar(
         title=ft.Row(
             [
-                ft.Text("Context Menu Plugin Manager", size=20, weight=ft.FontWeight.W_600, color=Colors.TEXT_CLR),
+                cft.Text("Context Menu Plugin Manager", size=cft.Text.Size.LARGE),
                 ft.Container(expand=True),
-                ft.Button("Generate Plugin", icon=ft.Icons.BOLT),
-                ft.Button("Add Plugin", icon=ft.Icons.ADD),
-                ft.Button("Open Plugins Folder", icon=ft.Icons.FOLDER, on_click=lambda e: os.system(f'explorer "{PLUGINS_DIR}"')),
+                cft.Button("Generate Plugin", icon=ft.Icons.BOLT, on_click=generate_plugin),
+                cft.Button("Add Plugin", icon=ft.Icons.ADD),
+                cft.Button("Open Plugins Folder", icon=ft.Icons.FOLDER, on_click=lambda e: os.system(f'explorer "{PLUGINS_DIR}"')),
                 # ft.IconButton(ft.Icons.SETTINGS, tooltip="Settings", on_click=lambda e: print("Settings")),
             ],
             spacing=20,
         ),
         leading_width=70,
         automatically_imply_leading=True,
-        bgcolor=Colors.BACKGROUND1_CLR,
-        surface_tint_color=Colors.BACKGROUND1_CLR,
+        bgcolor=th.theme.palette.bg_low,
+        surface_tint_color=th.theme.palette.bg_low,
     )
 
     page.add(
@@ -348,8 +447,8 @@ def main(page: ft.Page):
                         [
                             ft.Row(
                                 [
-                                    ft.Text("Plugins", size=18, weight=ft.FontWeight.W_600),
-                                    enable_disable_btn := Component.button("Disable All" if pm.is_all_plugin_enabled() else "Enable All", toggle_all_plugins),
+                                    cft.Text("Plugins", size=cft.Text.Size.MEDIUM),
+                                    enable_disable_btn := cft.Button(text="Disable All" if pm.is_all_plugin_enabled() else "Enable All", on_click=toggle_all_plugins),
                                 ],
                                 height=80,
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -363,7 +462,7 @@ def main(page: ft.Page):
                             ),
                         ],
                     ),
-                    bgcolor=Colors.BACKGROUND1_CLR,
+                    bgcolor=th.theme.palette.bg_low,
                     padding=ft.Padding(20, 0, 20, 20),
                     width=450,
                     alignment=ft.alignment.top_left,
@@ -376,13 +475,13 @@ def main(page: ft.Page):
                                     plugin_icon := ft.Image(pm.selected_plugin.icon_path, width=130, height=130),
                                     ft.Column(
                                         [
-                                            plugin_title := ft.Text(pm.selected_plugin.name, size=20),
-                                            plugin_description := ft.Text(pm.selected_plugin.description, size=14, color=Colors.DISABLED_CLR),
+                                            plugin_title := cft.Text(pm.selected_plugin.name, size=cft.Text.Size.MEDIUM),
+                                            plugin_description := cft.Text(pm.selected_plugin.description, dimmed=True, size=cft.Text.Size.SMALL),
                                             ft.Row(
                                                 [
                                                     # Component.Button("Uninstall"),
-                                                    Component.button("View in Explorer", lambda e: os.system(f'explorer "{pm.selected_plugin.path}"')),
-                                                    Component.button("Edit in VSCode", lambda e: os.system(f'code "{pm.selected_plugin.path}"')),
+                                                    cft.Button(text="View in Explorer", on_click=lambda e: os.system(f'explorer "{pm.selected_plugin.path}"')),
+                                                    cft.Button(text="Edit in VSCode", on_click=lambda e: os.system(f'code "{pm.selected_plugin.path}"')),
                                                 ],
                                             ),
                                         ],
@@ -401,7 +500,7 @@ def main(page: ft.Page):
                                                 [
                                                     plugin_markdown := ft.Markdown(
                                                         open(pm.selected_plugin.markdown, "r", encoding="utf-8").read(),
-                                                        code_theme=ft.MarkdownCodeTheme.SOLARIZED_DARK,
+                                                        code_theme=ft.MarkdownCodeTheme.DRAGULA,
                                                         extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
                                                     ),
                                                 ],
@@ -420,11 +519,11 @@ def main(page: ft.Page):
                                                     padding=ft.Padding(20, 20, 20, 0),
                                                     expand=True,
                                                 ),
-                                                ft.Divider(color=Colors.BACKGROUND2_CLR),
+                                                cft.Divider(alt=True, thickness=2),
                                                 ft.Row(
                                                     [
-                                                        Component.button("Save Configurations", save_plugin_configs),
-                                                        Component.button("Reset Configurations", reset_config),
+                                                        cft.Button(text="Reset Configurations", on_click=reset_config, icon=ft.Icons.REFRESH),
+                                                        cft.Button(text="Save Configurations", on_click=save_plugin_configs, icon=ft.Icons.SAVE),
                                                     ],
                                                     spacing=20,
                                                     alignment=ft.MainAxisAlignment.END,
@@ -436,13 +535,13 @@ def main(page: ft.Page):
                                 expand=True,
                                 scrollable=True,
                                 width=1000,
-                                divider_color=Colors.BACKGROUND2_CLR,
-                                label_color=Colors.TEXT_CLR,
-                                indicator_color=Colors.PRIMARY_CLR,
+                                divider_color=th.theme.palette.divider,
+                                label_color=th.theme.palette.text,
+                                indicator_color=th.theme.palette.secondary,
                             ),
                         ],
                     ),
-                    bgcolor=Colors.BACKGROUND0_CLR,
+                    bgcolor=th.theme.palette.bg,
                     padding=20,
                     border_radius=ft.border_radius.BorderRadius(10, 0, 0, 0),
                     width=450,
@@ -456,4 +555,6 @@ def main(page: ft.Page):
     )
 
 
-ft.app(main, assets_dir="assets")
+te = Themes()
+pm = PluginManager()
+ft.app(lambda page: main(page, pm, te), assets_dir=ASSETS_DIR)
