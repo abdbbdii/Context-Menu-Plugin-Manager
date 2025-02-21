@@ -8,7 +8,7 @@ import flet as f
 from manager import *
 from Themes import Themes
 from DropZone import LoadDLL
-
+from AI import AI
 
 # all_installed = False
 # while not all_installed:
@@ -22,7 +22,7 @@ from DropZone import LoadDLL
 
 class cf:
     class Button(f.Button):
-        def __init__(self, text: str | None = None, content: f.Control | None = None, on_click: Callable = None, icon: f.Icon = None):
+        def __init__(self, text: str | None = None, content: f.Control | None = None, on_click: Callable = None, icon: f.Icon = None, data: Any | None = None):
             super().__init__(
                 style=f.ButtonStyle(
                     bgcolor={
@@ -39,6 +39,50 @@ class cf:
                 content=content,
                 on_click=on_click,
                 icon_color=t.theme.palette.text,
+                data=data,
+            )
+
+    class VerticalButton(f.Button):
+        def __init__(self, text: str | None = None, content: f.Control | None = None, on_click: Callable = None, icon: f.Icon = None, data: Any | None = None):
+            if not content:
+                content = f.Column(
+                    [
+                        f.Container(
+                            f.Icon(icon, color=t.theme.palette.text, size=50),
+                            alignment=f.alignment.center,
+                        ),
+                        f.Container(
+                            cf.Text(text, size=cf.Text.Size.MEDIUM),
+                            alignment=f.alignment.center,
+                        ),
+                    ],
+                    spacing=5,
+                    alignment=f.alignment.center,
+                )
+            super().__init__(
+                style=f.ButtonStyle(
+                    bgcolor={
+                        f.ControlState.HOVERED: t.theme.palette.bg_high_hover,
+                        f.ControlState.DEFAULT: t.theme.palette.bg_high_selection,
+                    },
+                    padding=30,
+                    shape=f.RoundedRectangleBorder(radius=5),
+                    elevation=0,
+                    color=t.theme.palette.text,
+                ),
+                content=content,
+                width=200,
+                on_click=on_click,
+                data=data,
+            )
+
+    class IconButton(f.IconButton):
+        def __init__(self, icon: f.Icon, on_click: Callable, tooltip: str | None = None):
+            super().__init__(
+                icon=icon,
+                icon_color=t.theme.palette.text,
+                on_click=on_click,
+                tooltip=tooltip,
             )
 
     class Divider(f.Divider):
@@ -102,20 +146,17 @@ class cf:
             SMALL = 14
             TINY = 12
 
-        def __init__(self, text: str | None = None, overflow: f.TextOverflow = None, dimmed=False, size: Size = Size.MEDIUM):
-            super().__init__(value=text, size=size, color=t.theme.palette.text_muted if dimmed else t.theme.palette.text, overflow=overflow)
+        def __init__(self, text: str | None = None, overflow: f.TextOverflow = None, dimmed=False, size: Size = Size.MEDIUM, text_align: f.TextAlign = f.TextAlign.LEFT):
+            super().__init__(
+                value=text,
+                size=size,
+                color=t.theme.palette.text_muted if dimmed else t.theme.palette.text,
+                overflow=overflow,
+                text_align=text_align,
+            )
 
     class Dialog(f.AlertDialog):
-        def __init__(
-            self,
-            title: str | None = None,
-            subtitle: str | None = None,
-            content: f.Control | None = None,
-            actions: dict[str, Callable] = {},
-            on_dismiss: Callable | None = None,
-            get_callback: Callable | None = None,
-            alignment: f.Alignment | None = None,
-        ):
+        def __init__(self, title: str | None = None, subtitle: str | None = None, content: f.Control | None = None, actions: dict[str, Callable] = {}, on_dismiss: Callable | None = None, get_callback: Callable | None = None, alignment: f.Alignment | None = None):
             super().__init__(
                 modal=True,
                 title=f.Column(
@@ -133,87 +174,73 @@ class cf:
                 on_dismiss=on_dismiss,
                 alignment=alignment,
             )
-            for text, on_click in actions.items():
-                self.actions.append(cf.Button(text, on_click=on_click if on_click else self.close_dialog))
             self.get_callback = get_callback
+            for text, on_click in actions.items():
+                self.actions.append(
+                    cf.Button(
+                        text,
+                        data=on_click,
+                        on_click=self.closing_wrapper,
+                    ),
+                )
 
         def show(self, page: f.Page):
             page.open(self)
 
-        def close_dialog(self, e: f.ControlEvent):
+        def closing_wrapper(self, e: f.ControlEvent):
             e.page.close(e.control.parent)
             self.get_callback(e.control.text) if self.get_callback else None
-
-
-def load_plugins(files: list[Path] | None):
-    any_loaded = False
-    if files is None:
-        return any_loaded
-    for file in files:
-        if not isinstance(file, str):
-            file = file.path
-        file = Path(file).resolve()
-        if file.name.endswith(".zip"):
-            shutil.unpack_archive(file, TEMP_DIR)
-            if not PluginManager.check_path(TEMP_DIR):
-                empty_dir(TEMP_DIR)
-                continue
-            try:
-                move_contents(TEMP_DIR, PLUGINS_DIR)
-                empty_dir(TEMP_DIR)
-            except Exception as e:
-                print(e)
-                empty_dir(TEMP_DIR)
-                continue
-            any_loaded = True
-    return any_loaded
-
-
-def empty_dir(path: str):
-    for filename in os.listdir(path):
-        file_path = path / filename
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print(f"Failed to delete {file_path}. Reason: {e}")
-
-
-def move_contents(source_folder: Path, destination_folder: Path, overwrite=False):
-    if not source_folder.exists():
-        print("Source folder does not exist.")
-        return
-
-    os.makedirs(destination_folder, exist_ok=True)
-    for filename in os.listdir(source_folder):
-        src_path = source_folder / filename
-        dest_path = destination_folder / filename
-        if dest_path.exists() and not overwrite:
-            print(f"File '{filename}' already exists in '{destination_folder}'")
-            continue
-
-        shutil.move(src_path, dest_path)
+            if isinstance(e.control.data, Callable):
+                e.control.data(e)
 
 
 def main(page: f.Page, pm: PluginManager, t: Themes):
+    def load_plugins(files: list[Path] | None):
+        any_loaded = False
+        if files is None:
+            return any_loaded
+        for file in files:
+            if not isinstance(file, str):
+                file = file.path
+            file = Path(file).resolve()
+            if file.name.endswith(".zip"):
+                shutil.unpack_archive(file, TEMP_DIR)
+                if not PluginManager.check_path(TEMP_DIR):
+                    fs.empty_dir(TEMP_DIR)
+                    continue
+                try:
+                    fs.move_contents(TEMP_DIR, PLUGINS_DIR)
+                    fs.empty_dir(TEMP_DIR)
+                except Exception as e:
+                    print(e)
+                    fs.empty_dir(TEMP_DIR)
+                    continue
+                any_loaded = True
+            elif file.is_dir():
+                if not PluginManager.check_path(file):
+                    continue
+                try:
+                    shutil.copytree(file, PLUGINS_DIR / file.name)
+                except Exception as e:
+                    print(e)
+                    continue
+                any_loaded = True
+        return any_loaded
+
     def handle_imports(files: list[Path] | None):
         if dnd_dialog in page.controls:
             close_dnd_dialog()
         if load_plugins(files):
-            pm.reload_plugins()
-            expansion_tiles.controls = [get_expansion_tiles_container()]
-            expansion_tiles.update()
+            refresh_page()
             cf.Dialog(
-                "Successfully Installed Plugins",
-                "Plugins have been successfully installed",
+                "Plugins Installed",
+                "The plugins have been installed successfully",
                 actions={"Ok": None},
             ).show(page)
         else:
             cf.Dialog(
-                "Failed to Install Plugins",
-                "No valid plugins found in the selected files",
+                "No Valid Plugins",
+                "No valid plugins were found in the selected files",
                 actions={"Ok": None},
             ).show(page)
         page.update()
@@ -226,14 +253,59 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
         page.close(dnd_dialog)
         page.update()
 
-    def generate_plugin(e: f.ControlEvent):
-        # check if key is valid and if not then do this:
+    def generate_plugin_btn(e: f.ControlEvent, key: str = "", prompt: str = ""):
+        if isinstance(e.control, f.Button):
+            e.control.disabled = True
+            e.control.update()
+        if key:
+            pm.ai_client.set_api_key(key)
+            pm.save_session()
+
+        check_validation = pm.ai_client.is_key_valid()
+
+        if isinstance(e.control, f.Button):
+            e.control.disabled = False
+            e.control.update()
+
+        if not check_validation:
+            cf.Dialog(
+                "Enter the key" if not key else "Invalid Key",
+                "Enter the Gmeni API key to generate the plugin" if not key else "The key is invalid. Please enter a valid Gemeni API key.",
+                text_feild := cf.TextField(label="Key", multiline=False, max_lines=1, value=pm.ai_client.get_api_key()),
+                actions={
+                    "Get a Gemini API Key": lambda e: os.system("start https://ai.google.dev/gemini-api/docs"),
+                    "Next": lambda e: generate_plugin_btn(e, text_feild.value),
+                    "Cancel": None,
+                },
+            ).show(page)
+            return
+
+        def handle_plugin_generation(e, prompt):
+            if not prompt:
+                generate_plugin_btn(e)
+            if pm.generate_plugin(prompt=prompt):
+                refresh_page()
+                cf.Dialog(
+                    "Plugin Generated",
+                    "The plugin has been generated successfully",
+                    actions={"Ok": None},
+                ).show(page)
+            else:
+                cf.Dialog(
+                    "Plugin Generation Failed",
+                    "An error occurred while generating the plugin",
+                    actions={
+                        "Try Again": lambda e: generate_plugin_btn(e, prompt=prompt),
+                        "Cancel": None,
+                    },
+                ).show(page)
+
         cf.Dialog(
-            "Enter the key",
-            "Enter the key to generate the plugin",
-            cf.TextField(label="Key", multiline=False, max_lines=1),
-            {
-                "Generate": lambda e: print("Generate"),
+            "Generate Plugin",
+            "Enter the prompt to generate the plugin",
+            text_feild := cf.TextField(label="Prompt", multiline=True, max_lines=10, value=prompt if prompt else "Plugin to manage my files"),
+            actions={
+                "Generate": lambda e: handle_plugin_generation(e, text_feild.value),
                 "Cancel": None,
             },
         ).show(page)
@@ -247,6 +319,74 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
             allow_multiple=True,
             allowed_extensions=["zip"],
         )
+        page.update()
+
+    def make_plugin(e: f.ControlEvent):
+        def handle_make_plugin(e: f.ControlEvent, name: str):
+            name = name.strip()
+            if not name or name == PLUGIN_TEMPLATE.name:
+                cf.Dialog(
+                    "Invalid Name",
+                    "The name cannot be empty or the same as the template plugin",
+                    actions={"Ok": None},
+                ).show(page)
+                return
+            shutil.copytree(PLUGIN_TEMPLATE, TEMP_DIR / name)
+            fs.move_contents(TEMP_DIR, PLUGINS_DIR)
+            refresh_page()
+            cf.Dialog(
+                "Plugin Made",
+                "The plugin has been made successfully",
+                actions={
+                    "Ok": None,
+                    "Open in VSCode": lambda e: os.system(f'code "{PLUGINS_DIR / name}"'),
+                },
+            ).show(page)
+
+        cf.Dialog(
+            "Make Plugin",
+            "Enter the name of the plugin to make",
+            text_feild := cf.TextField(label="Name", multiline=False, max_lines=1),
+            actions={
+                "Make": lambda e: handle_make_plugin(e, text_feild.value),
+                "Cancel": None,
+            },
+        ).show(page)
+
+    def add_plugin_dialog(e: f.ControlEvent):
+        cf.Dialog(
+            "Add Plugin",
+            "Select the plugin file to install",
+            f.Container(
+                f.Column(
+                    [
+                        f.Image("assets/drag_and_drop.svg", width=400, height=400),
+                        f.Row(
+                            [
+                                cf.VerticalButton("Select File", on_click=add_plugin, icon=f.Icons.ADD),
+                                cf.VerticalButton("Generate Plugin", on_click=generate_plugin_btn, icon=f.Icons.BOLT),
+                                cf.VerticalButton("Make Plugin", on_click=make_plugin, icon=f.Icons.BUILD),
+                            ],
+                            alignment=f.MainAxisAlignment.SPACE_BETWEEN,
+                            spacing=20,
+                        ),
+                    ],
+                    spacing=20,
+                    expand=False,
+                ),
+                expand=False,
+                expand_loose=False,
+            ),
+            actions={
+                "Cancel": None,
+            },
+            on_dismiss=lambda e: close_dnd_dialog(),
+            get_callback=lambda text: open_dnd_dialog(),
+        ).show(page)
+
+    def refresh_page(e: f.ControlEvent | None = None):
+        pm.reload_plugins()
+        expansion_tiles.controls = [get_expansion_tiles_container()]
         page.update()
 
     def get_expansion_tiles_container():
@@ -426,16 +566,19 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
         page.update()
 
     def reset_config(e: f.ControlEvent):
+        pm.selected_plugin.selected_types = pm.selected_plugin.supported_types
+        for control in pm.selected_plugin.types_control.controls:
+            control.value = control.label in pm.selected_plugin.selected_types
         for config in pm.selected_plugin.configs:
-            if "value" in config:
-                if config["type"] == "str" or config["type"] == "int" or config["type"] == "float" or config["type"] == "bool":
-                    config["control"].value = config["default"]
-                elif config["type"] == "checkbox":
-                    for control in config["control"].controls:
-                        control.value = control.label in config["default"]
-                elif config["type"] == "radio":
-                    config["control"].value = config["default"]
+            if config["type"] == "str" or config["type"] == "int" or config["type"] == "float" or config["type"] == "bool":
+                config["control"].value = config["default"]
+            elif config["type"] == "checkbox":
+                for control in config["control"].controls:
+                    control.value = control.label in config["default"]
+            elif config["type"] == "radio":
+                config["control"].value = config["default"]
 
+            if "value" in config:
                 del config["value"]
 
         refresh_config_page()
@@ -474,12 +617,12 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
             [
                 cf.Text("Context Menu Plugin Manager", size=cf.Text.Size.LARGE),
                 f.Container(expand=True),
-                cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin),
-                cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin),
+                cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin_btn),
+                cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
                 cf.Button("Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: os.system(f'explorer "{PLUGINS_DIR}"')),
                 # ft.IconButton(ft.Icons.SETTINGS, tooltip="Settings", on_click=lambda e: print("Settings")),
             ],
-            spacing=20,
+            spacing=10,
         ),
         leading_width=70,
         automatically_imply_leading=True,
@@ -496,7 +639,12 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
                             f.Row(
                                 [
                                     cf.Text("Plugins", size=cf.Text.Size.MEDIUM),
-                                    enable_disable_btn := cf.Button(text="Disable All" if pm.is_all_plugin_enabled() else "Enable All", on_click=toggle_all_plugins),
+                                    f.Row(
+                                        [
+                                            cf.IconButton(f.Icons.REFRESH, on_click=refresh_page, tooltip="Refresh"),
+                                            enable_disable_btn := cf.Button(text="Disable All" if pm.is_all_plugin_enabled() else "Enable All", on_click=toggle_all_plugins),
+                                        ],
+                                    ),
                                 ],
                                 height=80,
                                 alignment=f.MainAxisAlignment.SPACE_BETWEEN,

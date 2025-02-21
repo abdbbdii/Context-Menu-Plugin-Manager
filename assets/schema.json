@@ -1,0 +1,107 @@
+{
+    "type": "object",
+    "description": "plugin structure",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "name of the plugin"
+        },
+        "function": {
+            "type": "string",
+            "description": "python code for the plugin"
+        },
+        "requirements": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "requirement for the plugin"
+            },
+            "description": "requirements for the plugin"
+        },
+        "readme": {
+            "type": "string",
+            "description": "detailed description of the plugin in markdown format"
+        },
+        "plugin": {
+            "type": "object",
+            "description": "settings for the plugin to configure",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "short description of the plugin"
+                },
+                "supported_types": {
+                    "type": "array",
+                    "description": "multiple types supported by the plugin to use in different portions of the windows",
+                    "items": {
+                        "type": "string",
+                        "description": "supported type",
+                        "enum": [
+                            "DIRECTORY_BACKGROUND",
+                            "DIRECTORY",
+                            "FILES",
+                            "DRIVE",
+                            "DESKTOP"
+                        ]
+                    }
+                },
+                "configs": {
+                    "type": "array",
+                    "description": "configuration for the plugin to use inside the code as user input",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "variable name for the configuration"
+                            },
+                            "type": {
+                                "type": "string",
+                                "description": "data type for the configuration",
+                                "enum": [
+                                    "str",
+                                    "int",
+                                    "float",
+                                    "bool"
+                                ]
+                            },
+                            "label": {
+                                "type": "string",
+                                "description": "label for the configuration"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "description for the configuration"
+                            },
+                            "default": {
+                                "type": "string",
+                                "description": "default value for the configuration, stored as a string and parsed as needed"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "type",
+                            "label",
+                            "description"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "description",
+                "supported_types"
+            ]
+        },
+        "image_description": {
+            "type": "string",
+            "description": "description of the icon of plugin in text format"
+        }
+    },
+    "required": [
+        "name",
+        "function",
+        "readme",
+        "plugin",
+        "image_description"
+    ]
+}

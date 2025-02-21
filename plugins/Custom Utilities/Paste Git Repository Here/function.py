@@ -10,7 +10,7 @@ plugin_info = {
     "menu_name": "abd Utils",
 }
 
-def driver(folders: list[str] = [], params: str = ""):
+def driver(items: list[str] = [], params: str = ""):
     mat = re.match(r"(?:https?:\/\/)?github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?(?:\/.*)?$", paste())
     if mat:
         owner = mat.group(1)

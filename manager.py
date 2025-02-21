@@ -1,12 +1,15 @@
 import os
 import json
 import uuid
+import shutil
 from pathlib import Path
 from types import FunctionType
 from typing import Literal, Any
 from importlib.util import spec_from_file_location, module_from_spec
 
 from context_menu import menus
+
+from AI import AI
 
 
 ROOT = Path(__file__).parent.resolve()
@@ -18,11 +21,14 @@ ASSETS_DIR = ROOT / "assets"
 os.makedirs(ASSETS_DIR, exist_ok=True)
 THEMES_DIR = ROOT / "assets" / "themes"
 os.makedirs(THEMES_DIR, exist_ok=True)
+PLUGIN_TEMPLATE = ROOT / "assets" / "Plugin Template"
 SESSION_FILE = ROOT / "session.json"
+SCHEMA_FILE = ASSETS_DIR / "schema.json"
+SYSTEM_INSTRUCTIONS_FILE = ASSETS_DIR / "system_instructions.md"
 PLUGIN_TYPES = ["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"]
+
+
 # DOT_ENV = ROOT / ".env"
-
-
 def driver_decorator(func: FunctionType) -> FunctionType:
     def wrapper(*args, **kwargs):
         if "params" in kwargs:
@@ -50,6 +56,8 @@ class Plugin(menus.ContextCommand):
         supported_types: list[Literal["FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "DESKTOP"]] | None = None,
         enabled: bool = False,
         configs: dict[str, Any] | None = None,
+        params: str = "",
+        type: str = "",
     ):
         super().__init__(
             name=name,
@@ -67,7 +75,8 @@ class Plugin(menus.ContextCommand):
         self.path = path
         self.enabled = enabled
         self.configs = configs
-        self.params = ""
+        self.type = type
+        self.params = params
 
         self.set_params_from_config()
 
@@ -81,7 +90,6 @@ class Plugin(menus.ContextCommand):
         spec = spec_from_file_location("function", path / "function.py")
         module = module_from_spec(spec)
         spec.loader.exec_module(module)
-
         # module.driver = driver_decorator(module.driver)
 
         return Plugin(
@@ -118,6 +126,10 @@ class Plugin(menus.ContextCommand):
             return None
         for config in self.configs:
             config["value"] = params[config["name"]] if config["name"] in params else None
+
+    def compile(self):
+        if self.enabled:
+            menus.FastCommand(self.name, type=self.type, python=self.python, params=self.params, icon_path=self.icon_path).compile()
 
 
 class Menu(menus.ContextMenu):
@@ -171,14 +183,50 @@ class PluginManager:
         self.get_from_path(path)
         self.selected_plugin: Plugin | None = self.get_first_plugin()
         self.previous_plugin: Plugin | None = None
+        self.ai_client = AI(
+            schema=json.load(open(SCHEMA_FILE)),
+            system_instructions=open(SYSTEM_INSTRUCTIONS_FILE).read(),
+        )
         self.load_session()
-    
+
+    def generate_plugin(self, prompt: str):
+        try:
+            response: dict = self.ai_client.generate_object(prompt)
+            plugin_dir = TEMP_DIR / response["name"]
+            os.makedirs(plugin_dir)
+            with open(plugin_dir / "function.py", "w") as file:
+                file.write(response["function"])
+            with open(plugin_dir / "plugin.json", "w") as file:
+                file.write(json.dumps(response["plugin"]))
+            with open(plugin_dir / "README.md", "w") as file:
+                file.write(response["readme"])
+            with open(plugin_dir / "requirements.txt", "w") as file:
+                file.write("\n".join(response["requirements"]))
+            # with open(plugin_dir / "icon.ico", "wb") as file:
+            #     file.write(response["image"])
+        except Exception as e:
+            print(e)
+            return False
+
+        if PluginManager.check_path(TEMP_DIR):
+            fs.move_contents(TEMP_DIR, PLUGINS_DIR)
+        return True
+
+    def get_settings(self):
+        return {
+            "ai_api_key": self.ai_client.get_api_key(),
+        }
+
+    def set_settings(self, settings):
+        self.ai_client.set_api_key(settings["ai_api_key"])
+
     @staticmethod
     def check_path(path: Path | str):
         try:
             temp_pm = PluginManager(TEMP_DIR, no_setup=True)
             temp_pm.get_from_path(path)
             if not len(temp_pm.items):
+                print("got no items")
                 return False
             temp_pm.get_expand_types()
         except Exception as e:
@@ -192,23 +240,24 @@ class PluginManager:
 
     def get_from_path(self, path: Path | str):
         path = Path(path).resolve()
-        if not path.exists() or not path.is_dir():
+        if not path.is_dir():  # `.exists()` is redundant; `.is_dir()` already checks it
             return
 
-        items = os.listdir(path)
-        menus = [Menu.get_from_path(path / item) for item in items if Menu.is_menu_folder(path / item)]
-        # plugins = [Plugin.get_from_path(path / item) for item in items if Plugin.is_plugin_folder(path / item)]
+        items = list(Path(path).iterdir())  # Use `iterdir()` to avoid `os.listdir()` + manual joining
+        menus, plugins = [], []
 
-        if menus:
-            for menu in menus:
-                PluginManager.add_path_items(menu, path / menu.name)
-                self.items.append(menu)
+        for item in items:
+            if item.is_dir():  # Skip unnecessary function calls for non-directories
+                if Menu.is_menu_folder(item):
+                    menus.append(Menu.get_from_path(item))
+                elif Plugin.is_plugin_folder(item):
+                    plugins.append(Plugin.get_from_path(item))
 
-        # if plugins:
-        #     for plugin in plugins:
-        #         print(f"menus.removeMenu('Command for {plugin.name}', '{plugin.supported_types}')")
-        #         plugin = f"Command for {plugin}"
-        #         menus.FastCommand(plugin, type="FILES", python=plugin.python).compile()
+        for menu in menus:  # Inline check for `menus`
+            PluginManager.add_path_items(menu, menu.path)
+            self.items.append(menu)
+
+        self.items.extend(plugins)  # No need for `if plugins:`; `.extend([])` is safe
 
     def set_attr(self, id: uuid.UUID, attr: str, value):
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
@@ -254,11 +303,32 @@ class PluginManager:
         for plugin in self.items:
             if isinstance(plugin, Menu):
                 for type in PLUGIN_TYPES:
-                    new_menu = Menu(name=plugin.name, description=plugin.description, icon_path=plugin.icon_path, path=plugin.path)
+                    new_menu = Menu(
+                        name=plugin.name,
+                        description=plugin.description,
+                        icon_path=plugin.icon_path,
+                        path=plugin.path,
+                    )
                     new_menu.type = type
                     PluginManager.__expand_menu_types(new_menu, plugin, type, filter)
                     if new_menu.sub_items:
                         expanded_plugins.append(new_menu)
+            if isinstance(plugin, Plugin):
+                for type in plugin.selected_types:
+                    new_plugin = Plugin(
+                        name=plugin.name,
+                        python=plugin.python,
+                        path=plugin.path,
+                        icon_path=plugin.icon_path,
+                        markdown=plugin.markdown,
+                        description=plugin.description,
+                        supported_types=plugin.supported_types,
+                        enabled=plugin.enabled,
+                        configs=plugin.configs,
+                        params=plugin.params,
+                        type=type,
+                    )
+                    expanded_plugins.append(new_plugin)
         return expanded_plugins
 
     @staticmethod
@@ -277,30 +347,26 @@ class PluginManager:
     def create_menu(self):
         expanded_items = self.get_expand_types(filter=lambda x: x.enabled == True)
         for item in expanded_items:
-            if isinstance(item, Menu):
-                item.compile()
+            item.compile()
 
     def remove_menu(self):
         expanded_items = self.get_expand_types(filter=lambda x: x.enabled == False)
         for item in expanded_items:
-            if isinstance(item, Menu):
-                try:
-                    menus.removeMenu(item.name, item.type)
-                except:
-                    pass
+            try:
+                menus.removeMenu(item.name, item.type)
+            except:
+                pass
 
     def refresh_menu(self):
         expanded_items = self.get_expand_types()
         for item in expanded_items:
-            if isinstance(item, Menu):
-                try:
-                    menus.removeMenu(item.name, item.type)
-                except:
-                    pass
+            try:
+                menus.removeMenu(item.name, item.type)
+            except:
+                pass
         expanded_items = self.get_expand_types(filter=lambda x: x.enabled == True)
         for item in expanded_items:
-            if isinstance(item, Menu):
-                item.compile()
+            item.compile()
 
     def disable_all(self):
         for plugin in self.walk_items():
@@ -350,6 +416,10 @@ class PluginManager:
             if isinstance(item, Menu):
                 yield from PluginManager.__walk_items(item, walk_only)
 
+    def initialize_ai(self, api_key: str):
+        if api_key:
+            self.ai_client.set_api_key(api_key)
+
     def save_session(self):
         def serialize_item(item):
             if isinstance(item, Plugin):
@@ -368,10 +438,9 @@ class PluginManager:
                     "sub_items": [serialize_item(child) for child in item.sub_items],
                 }
 
-        with open(SESSION_FILE, "w") as f:
-            session = [serialize_item(item) for item in self.items]
-
-            json.dump(session, f, indent=4)
+        items = [serialize_item(item) for item in self.items]
+        session = {"items": items, "settings": self.get_settings()}
+        json.dump(session, open(SESSION_FILE, "w"), indent=4)
 
     def load_session(self):
         def deserialize_item(data):
@@ -391,9 +460,9 @@ class PluginManager:
             return
 
         prev_session = PluginManager(no_setup=True)
-        with open(SESSION_FILE, "r") as f:
-            session_data = json.load(f)
-            prev_session.items = [deserialize_item(item) for item in session_data]
+        session_data = json.load(open(SESSION_FILE))
+        self.set_settings(session_data["settings"])
+        prev_session.items = [deserialize_item(item) for item in session_data["items"]]
         self.copy_plugin_configuration(prev_session)
 
     def copy_plugin_configuration(self, other: "PluginManager"):
@@ -418,3 +487,33 @@ class PluginManager:
             menus.removeMenu(name, type)
         except:
             pass
+
+
+class fs:
+    @staticmethod
+    def move_contents(source_folder: Path, destination_folder: Path, overwrite=False):
+        if not source_folder.exists():
+            print("Source folder does not exist.")
+            return
+
+        os.makedirs(destination_folder, exist_ok=True)
+        for filename in os.listdir(source_folder):
+            src_path = source_folder / filename
+            dest_path = destination_folder / filename
+            if dest_path.exists() and not overwrite:
+                print(f"File '{filename}' already exists in '{destination_folder}'")
+                continue
+
+            shutil.move(src_path, dest_path)
+    
+    @staticmethod
+    def empty_dir(path: str):
+        for filename in os.listdir(path):
+            file_path = path / filename
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")

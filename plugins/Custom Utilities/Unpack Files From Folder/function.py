@@ -2,8 +2,8 @@ from tkinter import messagebox
 import os, shutil
 
 
-def driver(folders: list[str] = [], params: str = ""):
-    for folder in folders:
+def driver(items: list[str] = [], params: str = ""):
+    for folder in items:
         for file in os.listdir(folder):
             print("Unpacking: ", file)
             shutil.move(os.path.join(folder, file), os.path.join(os.path.dirname(folder), file))

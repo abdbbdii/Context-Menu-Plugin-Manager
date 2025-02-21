@@ -46,8 +46,8 @@ def get_movies(folder_path) -> dict[Path, tuple[str, str]]:
     return movies
 
 
-def driver(folders: list[str] = [], params: str = ""):
-    folder_path = folders[0]
+def driver(items: list[str] = [], params: str = ""):
+    folder_path = items[0]
     movies = get_movies(folder_path)
     for path, movie in movies.items():
         if (path / "poster.ico").exists():

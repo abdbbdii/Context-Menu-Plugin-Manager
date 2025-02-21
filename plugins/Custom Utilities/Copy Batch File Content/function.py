@@ -3,10 +3,10 @@ from tkinter import ttk, messagebox
 import tkinter as tk
 
 
-def driver(folders: list[str] = [], params: str = ""):
+def driver(items: list[str] = [], params: str = ""):
     try:
         content = {}
-        for folder in folders:
+        for folder in items:
             for file in os.listdir(folder):
                 if os.path.isfile(os.path.join(folder, file)):
                     try:

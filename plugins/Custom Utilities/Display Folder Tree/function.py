@@ -3,7 +3,7 @@ import os
 from tkinter import messagebox
 
 
-def driver(folders, params):
+def driver(items: list[str] = [], params: str = ""):
     try:
         # Get the path of the current directory
         skip_folders = [".git", "__pycache__", "env", ".vscode"]
@@ -11,7 +11,7 @@ def driver(folders, params):
         if more_skip_folders := input("Enter more folders to skip separated by comma: "):
             skip_folders.extend(more_skip_folders.split(","))
 
-        paths = DisplayablePath.make_tree(Path(folders[0]), criteria=lambda path: True if path.name not in skip_folders else False)
+        paths = DisplayablePath.make_tree(Path(items[0]), criteria=lambda path: True if path.name not in skip_folders else False)
         for path in paths:
             print(path.displayable())
         os.system("pause")

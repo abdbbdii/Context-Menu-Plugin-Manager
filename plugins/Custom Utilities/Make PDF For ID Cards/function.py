@@ -13,8 +13,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.graphics import renderPDF
 
 
-def driver(folders: list[str] = [], params: str = ""):
-    for folder in folders:
+def driver(items: list[str] = [], params: str = ""):
+    for folder in items:
         try:
             main(folder, json.loads(params))
         except Exception as e:

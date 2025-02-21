@@ -10,8 +10,8 @@ from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 
 
-def driver(folders: list[str] = [], params: str = ""):
-    for file in folders:
+def driver(items: list[str] = [], params: str = ""):
+    for file in items:
         try:
             main(file, json.loads(params))
         except Exception as e:

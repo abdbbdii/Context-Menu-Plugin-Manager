@@ -4,12 +4,12 @@ import os
 from send2trash import send2trash
 
 
-def driver(folders: list[str] = [], params: str = ""):
+def driver(items: list[str] = [], params: str = ""):
     try:
         level = selector_window()
         folders_to_remove = []
         count = 0
-        for folder in folders:
+        for folder in items:
             for root, dirs, _ in os.walk(folder, topdown=False):
                 for directory in dirs:
                     directory_path = os.path.join(root, directory)

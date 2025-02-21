@@ -5,11 +5,11 @@ from tkinter import ttk
 import tkinter as tk
 
 
-def driver(folders: list[str] = [], params: str = ""):
+def driver(items: list[str] = [], params: str = ""):
     try:
         dict_of_files = {}
         allowed = ["cpp", "c"]
-        for folder in folders:
+        for folder in items:
             for root, _, files in os.walk(folder):
                 for file in files:
                     if file.split(".")[-1] in allowed and os.path.exists(os.path.join(root, file.split(".")[0] + ".exe")):
