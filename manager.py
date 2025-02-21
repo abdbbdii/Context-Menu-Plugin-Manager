@@ -264,11 +264,11 @@ class PluginManager:
             if plugin.id == id:
                 setattr(plugin, attr, value)
 
-    def reload_plugins(self):
+    def reload_plugins(self, select: Plugin | None = None):
         self.items = []
         self.get_from_path(PLUGINS_DIR)
-        self.selected_plugin: Plugin | None = self.get_first_plugin()
-        self.previous_plugin: Plugin | None = None
+        self.selected_plugin = self.select_plugin(name=select.name) if select else self.get_first_plugin()
+        self.previous_plugin = None
         self.load_session()
 
     @staticmethod
@@ -380,10 +380,10 @@ class PluginManager:
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             return plugin
 
-    def select_plugin(self, id: uuid.UUID):
+    def select_plugin(self, id: uuid.UUID | None = None, name: str | None = None) -> Plugin:
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
-                if self.selected_plugin.id != plugin.id:
+                if (self.selected_plugin.id != plugin.id and id) or (self.selected_plugin.name != plugin.name and name):
                     self.previous_plugin = self.selected_plugin
                     self.selected_plugin = plugin
                 return plugin
@@ -505,7 +505,7 @@ class fs:
                 continue
 
             shutil.move(src_path, dest_path)
-    
+
     @staticmethod
     def empty_dir(path: str):
         for filename in os.listdir(path):

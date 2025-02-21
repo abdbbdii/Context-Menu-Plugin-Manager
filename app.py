@@ -65,7 +65,7 @@ class cf:
                         f.ControlState.HOVERED: t.theme.palette.bg_high_hover,
                         f.ControlState.DEFAULT: t.theme.palette.bg_high_selection,
                     },
-                    padding=30,
+                    padding=20,
                     shape=f.RoundedRectangleBorder(radius=5),
                     elevation=0,
                     color=t.theme.palette.text,
@@ -360,22 +360,21 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
             f.Container(
                 f.Column(
                     [
-                        f.Image("assets/drag_and_drop.svg", width=400, height=400),
+                        f.Image(str(ASSETS_DIR / "drag_and_drop.svg"), width=400, height=400),
                         f.Row(
                             [
                                 cf.VerticalButton("Select File", on_click=add_plugin, icon=f.Icons.ADD),
                                 cf.VerticalButton("Generate Plugin", on_click=generate_plugin_btn, icon=f.Icons.BOLT),
-                                cf.VerticalButton("Make Plugin", on_click=make_plugin, icon=f.Icons.BUILD),
+                                cf.VerticalButton("Create New Plugin", on_click=make_plugin, icon=f.Icons.BUILD),
                             ],
                             alignment=f.MainAxisAlignment.SPACE_BETWEEN,
                             spacing=20,
                         ),
                     ],
+                    alignment=f.MainAxisAlignment.SPACE_AROUND,
                     spacing=20,
-                    expand=False,
                 ),
-                expand=False,
-                expand_loose=False,
+                height=550,
             ),
             actions={
                 "Cancel": None,
@@ -753,7 +752,7 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
     dnd_dialog = cf.Dialog(
         "Drag and Drop",
         "Drag and drop the plugin files here to install them",
-        content=f.Image("assets/drag_and_drop.svg", width=400, height=400),
+        content=f.Image(ASSETS_DIR / "drag_and_drop.svg", width=400, height=400),
         alignment=f.alignment.center,
     )
 

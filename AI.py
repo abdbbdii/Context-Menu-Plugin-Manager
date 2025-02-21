@@ -72,9 +72,3 @@ class AI(genai.Client):
         #     image = Image.open(BytesIO(generated_image.image.image_bytes))
         #     image.show()
         return response.generated_images
-
-
-# schema = json.load(open("assets/schema.json"))
-# training_data = open("assets/training_data.md").read()
-# c = AI(api_key="AIzaSyCZvvhK9U3ZfW-IqnOOCvqxk_6zPmCVYro", schema=schema, system_instructions=training_data)
-# print(json.dumps(c.generate_object("plugin to write provided string as file names character by characters")), file=open("output.json", "w"))
