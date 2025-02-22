@@ -5,7 +5,7 @@ import time
 
 import flet as f
 
-from manager import *
+from PluginManager import *
 from Themes import Themes
 from DropZone import LoadDLL
 from AI import AI
@@ -758,6 +758,7 @@ def main(page: f.Page, pm: PluginManager, t: Themes):
 
     time.sleep(0.2)
     loaded_DLL = LoadDLL(
+        DROPZONE_DLL_PATH,
         page=page,
         on_dropped=handle_imports,
         on_entered=open_dnd_dialog,

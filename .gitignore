@@ -7,3 +7,5 @@ cache
 session.*
 tempCodeRunnerFile.*
 *.old
+temp
+storage

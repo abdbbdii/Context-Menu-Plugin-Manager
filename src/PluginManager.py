@@ -12,7 +12,7 @@ from context_menu import menus
 from AI import AI
 
 
-ROOT = Path(__file__).parent.resolve()
+ROOT = Path(__file__).parent.parent.resolve()
 PLUGINS_DIR = ROOT / "plugins"
 os.makedirs(PLUGINS_DIR, exist_ok=True)
 TEMP_DIR = ROOT / "temp"
@@ -22,6 +22,7 @@ os.makedirs(ASSETS_DIR, exist_ok=True)
 THEMES_DIR = ROOT / "assets" / "themes"
 os.makedirs(THEMES_DIR, exist_ok=True)
 PLUGIN_TEMPLATE = ROOT / "assets" / "Plugin Template"
+DROPZONE_DLL_PATH = ROOT / "src" / "DropZone.dll"
 SESSION_FILE = ROOT / "session.json"
 SCHEMA_FILE = ASSETS_DIR / "schema.json"
 SYSTEM_INSTRUCTIONS_FILE = ASSETS_DIR / "system_instructions.md"

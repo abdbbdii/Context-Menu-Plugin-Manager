@@ -2,7 +2,7 @@ import os
 import json
 from pathlib import Path
 
-from manager import THEMES_DIR
+from PluginManager import THEMES_DIR
 
 
 class Palette:

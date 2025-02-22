@@ -3,10 +3,12 @@ import os
 import time
 import asyncio
 import flet as ft
+from pathlib import Path
+
 
 
 class LoadDLL:
-    def __init__(self, page: ft.Page = None, on_entered=None, on_leaved=None, on_dropped=None, is_working: bool = True):
+    def __init__(self, drop_zone_dll_path: Path | str, page: ft.Page = None, on_entered=None, on_leaved=None, on_dropped=None, is_working: bool = True):
         super().__init__()
         self.page = page
         self.title = page.title
@@ -15,6 +17,7 @@ class LoadDLL:
         self.is_leaved = ctypes.c_bool(False)
         self.is_over = ctypes.c_bool(False)
         self.is_dropped = ctypes.c_bool(False)
+        self.drop_zone_dll_path = Path(drop_zone_dll_path).resolve()
 
         self.on_entered = on_entered
         self.on_leaved = on_leaved
@@ -49,7 +52,7 @@ class LoadDLL:
         return file_names
 
     def __load_library(self):
-        self.dll = ctypes.WinDLL(os.path.abspath("DropZone.dll"))
+        self.dll = ctypes.WinDLL(self.drop_zone_dll_path)
         self.dll.GetFilesNames.restype = ctypes.POINTER(ctypes.c_char_p)
         self.dll.AttachDLL.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_bool), ctypes.POINTER(ctypes.c_bool), ctypes.POINTER(ctypes.c_bool), ctypes.POINTER(ctypes.c_bool)]
 

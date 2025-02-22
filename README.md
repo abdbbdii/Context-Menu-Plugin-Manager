@@ -53,7 +53,7 @@ First make sure you have Python 3.13.1 or above installed. If not, you can downl
 6. Run the program
 
    ```
-   python app.py
+   python src/app.py
    ```
 
 ## Creating a Plugin
