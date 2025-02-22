@@ -2,8 +2,6 @@ import os
 import json
 from pathlib import Path
 
-from PluginManager import THEMES_DIR
-
 
 class Palette:
     def __init__(self, palette: dict):
@@ -22,16 +20,20 @@ class Palette:
         self.text_muted = palette["text-muted"]
         self.divider = palette["divider"]
         self.divider_alt = palette["divider-alt"]
+        self.error = palette["error"]
+        self.warning = palette["warning"]
+        self.success = palette["success"]
+        self.info = palette["info"]
 
 
 class Theme:
     def __init__(self, theme: dict):
-        self.name = theme["name"]
+        self.name: str = theme["name"]
         self.palette = Palette(theme["palette"])
 
 
 class Themes:
-    def __init__(self, path: Path = THEMES_DIR):
+    def __init__(self, path: Path):
         self.themes: list[Theme] = []
         self.load_themes(path)
         self.theme = self.themes[0]
@@ -43,8 +45,11 @@ class Themes:
             with open(path / theme, "r") as f:
                 self.themes.append(Theme(json.load(f)))
 
-    def select_theme(self, theme_name: str):
+    def set_theme(self, theme_name: str):
         for theme in self.themes:
             if theme.name == theme_name:
                 self.theme = theme
                 break
+
+    def get_themes(self):
+        return [theme.name for theme in self.themes]

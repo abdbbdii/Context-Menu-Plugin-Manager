@@ -1,8 +1,5 @@
-import json
-
 from google import genai
 from google.genai import types
-# from pydantic import BaseModel, TypeAdapter
 
 
 class AI(genai.Client):
@@ -68,7 +65,4 @@ class AI(genai.Client):
                 **config,
             ),
         )
-        # for generated_image in response.generated_images:
-        #     image = Image.open(BytesIO(generated_image.image.image_bytes))
-        #     image.show()
         return response.generated_images

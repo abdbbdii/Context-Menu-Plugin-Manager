@@ -8,8 +8,16 @@ from typing import Literal, Any
 from importlib.util import spec_from_file_location, module_from_spec
 
 from context_menu import menus
+from flet import (
+    Image,
+    Text,
+    Button,
+    Markdown,
+    Container,
+)
 
 from AI import AI
+from Themes import Themes
 
 
 ROOT = Path(__file__).parent.parent.resolve()
@@ -45,6 +53,16 @@ def driver_decorator(func: FunctionType) -> FunctionType:
     return wrapper
 
 
+class Controls:
+    icon: Image = None
+    name: Text = None
+    description: Text = None
+    configs: Container = None
+    markdown: Markdown = None
+    tile: Button = None
+    enable_disable_btn: Button = None
+
+
 class Plugin(menus.ContextCommand):
     def __init__(
         self,
@@ -78,6 +96,7 @@ class Plugin(menus.ContextCommand):
         self.configs = configs
         self.type = type
         self.params = params
+        self.controls: Controls = Controls()
 
         self.set_params_from_config()
 
@@ -149,6 +168,7 @@ class Menu(menus.ContextMenu):
         self.path: Path | None = path
         self.type: Literal["DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE", "FILES", "DESKTOP"] | None = None
         self.enabled: bool = False
+        self.controls: Controls = Controls()
         super().__init__(
             name=name,
             type=None,
@@ -182,8 +202,10 @@ class PluginManager:
         if no_setup:
             return
         self.get_from_path(path)
-        self.selected_plugin: Plugin | None = self.get_first_plugin()
+        self.selected_plugin: Plugin | None = next(self.walk_items(walk_only=PluginManager.ItemType.PLUGIN), None)
         self.previous_plugin: Plugin | None = None
+        self.controls: Controls = Controls()
+        self.themes = Themes(THEMES_DIR)
         self.ai_client = AI(
             schema=json.load(open(SCHEMA_FILE)),
             system_instructions=open(SYSTEM_INSTRUCTIONS_FILE).read(),
@@ -212,14 +234,28 @@ class PluginManager:
         if PluginManager.check_path(TEMP_DIR):
             fs.move_contents(TEMP_DIR, PLUGINS_DIR)
         return True
+    
+    def uninstall_plugin(self, plugin: None | Plugin = None):
+        if plugin:
+            fs.empty_dir(plugin.path)
+            try:
+                os.rmdir(plugin.path)
+            except Exception as e:
+                print(e)
+        else:
+            self.uninstall_plugin(self.selected_plugin)
 
     def get_settings(self):
         return {
             "ai_api_key": self.ai_client.get_api_key(),
+            "theme": self.themes.theme.name,
         }
 
     def set_settings(self, settings):
-        self.ai_client.set_api_key(settings["ai_api_key"])
+        if "ai_api_key" in settings:
+            self.ai_client.set_api_key(settings["ai_api_key"]) 
+        if "theme" in settings:
+            self.themes.set_theme(settings["theme"])
 
     @staticmethod
     def check_path(path: Path | str):
@@ -227,7 +263,6 @@ class PluginManager:
             temp_pm = PluginManager(TEMP_DIR, no_setup=True)
             temp_pm.get_from_path(path)
             if not len(temp_pm.items):
-                print("got no items")
                 return False
             temp_pm.get_expand_types()
         except Exception as e:
@@ -241,34 +276,37 @@ class PluginManager:
 
     def get_from_path(self, path: Path | str):
         path = Path(path).resolve()
-        if not path.is_dir():  # `.exists()` is redundant; `.is_dir()` already checks it
+        if not path.is_dir():
+            return
+        
+        if Plugin.is_plugin_folder(path):
+            self.items.append(Plugin.get_from_path(path))
             return
 
-        items = list(Path(path).iterdir())  # Use `iterdir()` to avoid `os.listdir()` + manual joining
         menus, plugins = [], []
 
-        for item in items:
-            if item.is_dir():  # Skip unnecessary function calls for non-directories
+        for item in Path(path).iterdir():
+            if item.is_dir():
                 if Menu.is_menu_folder(item):
                     menus.append(Menu.get_from_path(item))
                 elif Plugin.is_plugin_folder(item):
                     plugins.append(Plugin.get_from_path(item))
 
-        for menu in menus:  # Inline check for `menus`
+        for menu in menus:
             PluginManager.add_path_items(menu, menu.path)
             self.items.append(menu)
 
-        self.items.extend(plugins)  # No need for `if plugins:`; `.extend([])` is safe
+        self.items.extend(plugins)
 
     def set_attr(self, id: uuid.UUID, attr: str, value):
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
                 setattr(plugin, attr, value)
 
-    def reload_plugins(self, select: Plugin | None = None):
+    def reload_plugins(self):
         self.items = []
         self.get_from_path(PLUGINS_DIR)
-        self.selected_plugin = self.select_plugin(name=select.name) if select else self.get_first_plugin()
+        self.selected_plugin = next(self.walk_items(walk_only=PluginManager.ItemType.PLUGIN), None)
         self.previous_plugin = None
         self.load_session()
 
@@ -377,10 +415,6 @@ class PluginManager:
         for plugin in self.walk_items():
             plugin.enabled = True
 
-    def get_first_plugin(self) -> Plugin:
-        for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
-            return plugin
-
     def select_plugin(self, id: uuid.UUID | None = None, name: str | None = None) -> Plugin:
         for plugin in self.walk_items(walk_only=PluginManager.ItemType.PLUGIN):
             if plugin.id == id:
@@ -410,6 +444,7 @@ class PluginManager:
             if isinstance(item, Menu):
                 yield from PluginManager.__walk_items(item, walk_only)
 
+    @staticmethod
     def __walk_items(menu: Menu, walk_only: Any | None = None):
         for item in menu.sub_items:
             if walk_only is None or isinstance(item, walk_only):

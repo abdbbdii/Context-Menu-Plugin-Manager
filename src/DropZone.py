@@ -1,5 +1,4 @@
 import ctypes
-import os
 import time
 import asyncio
 import flet as ft
@@ -8,7 +7,7 @@ from pathlib import Path
 
 
 class LoadDLL:
-    def __init__(self, drop_zone_dll_path: Path | str, page: ft.Page = None, on_entered=None, on_leaved=None, on_dropped=None, is_working: bool = True):
+    def __init__(self, page: ft.Page = None, on_entered=None, on_leaved=None, on_dropped=None, is_working: bool = True, drop_zone_dll_path: Path | str = "DropZone.dll"):
         super().__init__()
         self.page = page
         self.title = page.title

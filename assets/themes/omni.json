@@ -1,6 +1,6 @@
 {
-    "name": "Omen",
-    "description": "A dark theme inspired by the Omen brand.",
+    "name": "Omni",
+    "description": "A dark theme with a vibrant color palette.",
     "palette": {
         "bg": "#191622",
         "bg-selection": "#201b2d",
@@ -16,6 +16,10 @@
         "text": "#e1e1e6",
         "text-muted": "#a9a9af",
         "divider": "#302d37",
-        "divider-alt": "#ff79c6"
+        "divider-alt": "#ff79c6",
+        "error": "#e96379",
+        "warning": "#E89E64",
+        "info": "#5a4b81",
+        "success": "#54b068"
     }
 }
