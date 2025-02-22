@@ -11,6 +11,10 @@ This project manages context menu plugins to extend functionality in various dir
 - **Plugin Development:** Easily create plugins with metadata and functionality.
 - **Dynamic Menu Modification:** Add or remove context menu items on the fly.
 - **Extensible:** Customize and extend functionality by creating new plugins.
+- **Generate Plugin using AI:** Generate a plugin using AI to automate the process.
+- **Drag and Drop:** Drag and drop files to add plugins to the context menu.
+- **Configuration:** Configure plugins with parameters to customize behavior.
+- **Customization:** Customize the appearance of the application with themes.
 
 ## Installation
 
