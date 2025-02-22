@@ -23,6 +23,13 @@
             "default": "123"
         },
         {
+            "name": "example_float",
+            "type": "float",
+            "label": "Example Float",
+            "description": "An example float parameter.",
+            "default": "123.45"
+        },
+        {
             "name": "example_bool",
             "type": "bool",
             "label": "Example Boolean",

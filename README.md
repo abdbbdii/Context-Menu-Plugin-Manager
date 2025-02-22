@@ -1,112 +1,126 @@
 # Context Menu Plugin Manager
 
-![alt text](<assets/mockup (2).png>)
+![screenshot_1](screenshots/screenshot_1.png)
+![screenshot_2](screenshots/screenshot_2.png)
+![screenshot_3](screenshots/screenshot_3.png)
 
 This project manages context menu plugins to extend functionality in various directories. It allows dynamic addition and removal of context menu items using Python scripts.
 
-## Usage
-1. Place plugin scripts in the `plugins` directory.
-2. Run `main.py` to manage and load plugins.
-
 ## Features
+
 - **Plugin Development:** Easily create plugins with metadata and functionality.
 - **Dynamic Menu Modification:** Add or remove context menu items on the fly.
 - **Extensible:** Customize and extend functionality by creating new plugins.
 
----
-
 ## Installation
-First make sure you have Python 3.12.2 or above installed. If not, you can download it from [here](https://www.python.org/downloads/).
+
+First make sure you have Python 3.13.1 or above installed. If not, you can download it from [here](https://www.python.org/downloads/).
+
 1. Clone the repository:
-  ```
-  git clone https://github.com/abdbbdii/context-menu-plugin-manager.git
-  ```
+
+   ```
+   git clone https://github.com/abdbbdii/Context-Menu-Plugin-Manager.git
+   ```
 
 2. Go inside the repository:
-  ```
-  cd context-menu-plugin-manager
-  ```
 
-3. Install the requirements
-  ```
-  pip3 install -r requirements.txt
-  ```
+   ```
+   cd Context-Menu-Plugin-Manager
+   ```
 
-4. Run the program
-  ```
-  python main.py
-  ```
+3. Create a virtual environment
 
----
+   ```
+   python -m venv .venv
+   ```
+
+4. Activate the virtual environment
+
+   ```
+    .venv\Scripts\activate
+   ```
+
+5. Install the requirements
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+6. Run the program
+
+   ```
+   python app.py
+   ```
 
 ## Creating a Plugin
 
-### **Create Python Script**:
-- Create a new Python script in the `plugins` directory.
-- The script should contain the following structure:
+This is a template plugin to help you get started with creating your own plugins.
+
+## Usage
+
+The `driver` function receives two arguments:
+
+- `items`: A list of strings representing the selected folders/files.
+- `params`: A JSON string containing the configuration parameters.
+
+You can access the configuration parameters in the 'Configure Plugin' tab.
+
+## Example
 
 ```python
-plugin_info = {
-    "title": str,
-    "description": str,
-    "menu_name": str,
-    "type": ["FILES", "DIRECTORY", "DIRECTORY_BACKGROUND", "DRIVE"],
-}
+# Import the JSON module to work with JSON data
+import json
 
-def driver(folders, params):
-    ...
+"""
+It receives a list of items and a JSON string as parameters.
+It prints the items and the parameters to the console.
+The `__name__ == "__main__"` block is for testing purposes only.
+The `driver` function is the entry point for the Python script.
+"""
+
+
+# Only this line of code is required to create a plugin
+def driver(items: list[str] = [], params: str = ""):
+
+    # Convert JSON string to dictionary
+    json_data = json.loads(params) if params else {}
+
+    print("Folders/Files:")
+    for item in items:
+        print(item)
+
+    print("Params:")
+    for key, value in json_data.items():
+        print(f"{key}: {value}")
+
+    # Keep the console open by waiting for user input
+    input("Press Enter to exit")
+
+
+# For testing in the local directory (not executed when triggered as a plugin)
+if __name__ == "__main__":
+    json_data: dict = {
+        "param1": "value1",
+        "param2": "value2",
+    }
+
+    string_data: str = json.dumps(json_data)
+
+    driver(["file1.txt", "file2.txt"], string_data)
 ```
-
-### **`plugin_info` variable**:
-Define a variable named `plugin_info` containing the following keys.
-  - `title` is the name of the script that is displayed as an item in context menu.
-  - `description` (optional) is the description of the script.
-  - `menu_name` is the name of the menu item that will be displayed in the context menu.
-  - `type` is the type of the plugin. It is the list of one or more of `DIRECTORY`, `DIRECTORY_BACKGROUND`, `DRIVE`, `FILES`. See the table below for more information.
-
-### **`type` values**:
-| Type                   | Description                                     |
-| ---------------------- | ----------------------------------------------- |
-| `DIRECTORY`            | For opening on a directory.                     |
-| `DIRECTORY_BACKGROUND` | For opening on the background of the directory. |
-| `DRIVE`                | For opening on the drives like USB drive.       |
-| `FILES`                | For opening on a file.                          |
-
-### **`driver` function**:
-Implement the `driver` function and pass two parameters:
-  - `folders` (selected directories)
-  - `params` (additional parameters).
-
-### **Run the Project**:
-  - Run `main.py` to load and manage plugins.
-  - Test your plugin by right-clicking on an empty space within a folder.
-
-### Example:
-```python
-plugin_info = {
-    "title": "My Plugin Title",
-    "description": "Description of my plugin.",
-    "menu_name": "My Plugin Menu",
-    "type": ["DIRECTORY_BACKGROUND"],
-}
-def driver(folders, params):
-    for folder in folders:
-        print("Processing folder:", folder)
-```
-
----
-
-## Example Plugins
-- **Remove Empty Folders:** Recursively remove empty folders within directories.
-- **Unpack Files From Folder:** Move files from subfolders to parent directories.
-- **Copy File Content:** Copy the content of all files in the current directory to the clipboard.
-- *For more examples, see my other [plugins](https://github.com/abdbbdii/plugins)*.
 
 ## License
+
 This project is licensed under the [BSD License](https://github.com/abdbbdii/context-menu-plugin-manager/blob/main/LICENSE).
 
 ## Contributing
+
 Contributions are welcome! Feel free to open issues or submit pull requests to improve this project.
 
 ## Credits
-Shout out to [@saleguas](https://github.com/saleguas) for making [`context-menu`](https://github.com/saleguas/context_menu) python package.
+
+Big thanks to these awesome creators!
+
+- [@Flet Dev Community](https://github.com/flet-dev) for the [`flet`](https://flet.dev/) - A framework based on flutter for creating desktop applications.
+- [@saleguas](https://github.com/saleguas) for the [`context-menu`](https://github.com/saleguas/context_menu) - A library to customize the context menu.
+- [@Wanna-Pizza](https://github.com/Wanna-Pizza) for the [`FletDropZone`](https://github.com/Wanna-Pizza/FletDropZone) - A drag and drop feature for `flet`.

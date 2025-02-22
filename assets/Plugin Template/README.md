@@ -14,7 +14,8 @@ You can access the configuration parameters in the 'Configure Plugin' tab.
 ## Example
 
 ```python
-import json  # Import the JSON module to work with JSON data
+# Import the JSON module to work with JSON data
+import json
 
 """
 It receives a list of items and a JSON string as parameters.
@@ -24,8 +25,11 @@ The `driver` function is the entry point for the Python script.
 """
 
 
+# Only this line of code is required to create a plugin
 def driver(items: list[str] = [], params: str = ""):
-    json_data = json.loads(params) if params else {}  # Convert JSON string to dictionary
+
+    # Convert JSON string to dictionary
+    json_data = json.loads(params) if params else {}
 
     print("Folders/Files:")
     for item in items:
@@ -35,9 +39,18 @@ def driver(items: list[str] = [], params: str = ""):
     for key, value in json_data.items():
         print(f"{key}: {value}")
 
-    input("Press Enter to exit")  # Keep the console open by waiting for user input
+    # Keep the console open by waiting for user input
+    input("Press Enter to exit")
 
 
-if __name__ == "__main__":  # For testing only
-    driver(["file1.txt", "file2.txt"], '{"param1": "value1", "param2": "value2"}')
+# For testing in the local directory (not executed when triggered as a plugin)
+if __name__ == "__main__":
+    json_data: dict = {
+        "param1": "value1",
+        "param2": "value2",
+    }
+
+    string_data: str = json.dumps(json_data)
+
+    driver(["file1.txt", "file2.txt"], string_data)
 ```
