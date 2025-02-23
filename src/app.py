@@ -256,14 +256,7 @@ def main(page: f.Page, pm: PluginManager):
         def handle_change_theme(theme: str):
             pm.themes.set_theme(theme)
             pm.save_session()
-            page.remove(page.controls[0])
-            page.add(
-                f.Row(
-                    controls=[get_expansion_tiles(), get_plugin_page()],
-                    expand=True,
-                    spacing=0,
-                ),
-            )
+            make_page()
             page.update()
             cf.ShowSnackBar("The theme has been changed successfully", page)
 
@@ -536,9 +529,37 @@ def main(page: f.Page, pm: PluginManager):
 
     def make_page():
         if page.controls:
-            page.remove(page.controls[0])
+            page.controls.pop()
+            page.controls.pop()
 
         page.add(
+            # f.Column([
+            f.Container(
+                f.Row(
+                    [
+                        cf.Text("Context Menu Plugin Manager", size=cf.Text.Size.LARGE),
+                        f.Container(expand=True),
+                        cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin_btn),
+                        cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
+                        f.PopupMenuButton(
+                            items=[
+                                # icon=f.Icons.FOLDER
+                                # icon=f.Icons.DELETE
+                                # icon=f.Icons.PALETTE
+                                f.PopupMenuItem(text="Open Plugins Folder", on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{PLUGINS_DIR}"'), cf.hide_loading())),
+                                f.PopupMenuItem(text="Force Remove Plugin", on_click=force_remove_plugin),
+                                f.PopupMenuItem(text="Change Theme", on_click=change_theme),
+                            ],
+                            bgcolor=pm.themes.current.palette.bg_high_selection,
+                            menu_position=f.PopupMenuPosition.UNDER,
+                            icon_color=pm.themes.current.palette.text,
+                        ),
+                    ],
+                    spacing=10,
+                ),
+                bgcolor=pm.themes.current.palette.bg_low,
+                padding=f.Padding(20, 5, 20, 5),
+            ),
             f.Row(
                 controls=[
                     get_expansion_tiles(),
@@ -546,46 +567,14 @@ def main(page: f.Page, pm: PluginManager):
                 ],
                 expand=True,
                 spacing=0,
-            )
-        )
-
-    def make_appbar():
-        appbar = f.AppBar(
-            title=f.Row(
-                [
-                    cf.Text("Context Menu Plugin Manager", size=cf.Text.Size.LARGE),
-                    f.Container(expand=True),
-                    cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin_btn),
-                    cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
-                    f.PopupMenuButton(
-                        items=[
-                            f.PopupMenuItem(text="Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{PLUGINS_DIR}"'), cf.hide_loading())),
-                            f.PopupMenuItem(text="Force Remove Plugin", icon=f.Icons.DELETE, on_click=force_remove_plugin),
-                            f.PopupMenuItem(text="Change Theme", icon=f.Icons.PALETTE, on_click=change_theme),
-                        ],
-                        bgcolor=pm.themes.current.palette.bg_high_selection,
-                        menu_position=f.PopupMenuPosition.UNDER,
-                    ),
-                ],
-                spacing=10,
             ),
-            bgcolor=pm.themes.current.palette.bg_low,
-            surface_tint_color=pm.themes.current.palette.bg_low,
         )
-            # page.remove(page.appbar_ref)
-        if page.appbar_ref if hasattr(page, "appbar_ref") else False:
-            page.appbar_ref = appbar
-        else:
-            page.appbar = appbar
-            page.appbar_ref = appbar
-        page.update()
-        # page.appbar.update()
 
     def refresh_page(e: f.ControlEvent | None = None, snackbar=False, load_plugins=False):
         # cf.show_loading(page)
         pm.reload_plugins()
         make_page()
-        make_appbar()
+        page.bgcolor = pm.themes.current.palette.bg_low
         page.update()
         # cf.hide_loading()
         if snackbar:
@@ -956,16 +945,16 @@ def main(page: f.Page, pm: PluginManager):
         cf.ShowSnackBar("Configurations saved successfully", page)
 
     page.title = "Context Menu Plugin Manager"
-    page.icon = "assets/icon.ico"
+    # page.icon = "assets/icon.ico"
     page.fonts = {"Inter": "Inter[slnt,wght].ttf"}
     page.theme = f.Theme(font_family="Inter")
     page.padding = 0
     page.bgcolor = pm.themes.current.palette.bg_low
     page.window_min_height = 610
     page.window_min_width = 713
+    page.spacing = 0
 
     make_page()
-    make_appbar()
 
     page.update()
 
