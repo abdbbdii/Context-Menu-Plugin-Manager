@@ -26,19 +26,19 @@ class cf:
             super().__init__(
                 style=f.ButtonStyle(
                     bgcolor={
-                        f.ControlState.HOVERED: pm.themes.theme.palette.bg_high_hover,
-                        f.ControlState.DEFAULT: pm.themes.theme.palette.bg_high_selection,
+                        f.ControlState.HOVERED: pm.themes.current.palette.bg_high_hover,
+                        f.ControlState.DEFAULT: pm.themes.current.palette.bg_high_selection,
                     },
                     padding=f.Padding(10, 5, 10, 5),
                     shape=f.RoundedRectangleBorder(radius=5),
                     elevation=0,
-                    color=pm.themes.theme.palette.text,
+                    color=pm.themes.current.palette.text,
                 ),
                 text=text,
                 icon=icon,
                 content=content,
                 on_click=on_click,
-                icon_color=pm.themes.theme.palette.text,
+                icon_color=pm.themes.current.palette.text,
                 data=data,
             )
 
@@ -48,7 +48,7 @@ class cf:
                 content = f.Column(
                     [
                         f.Container(
-                            f.Icon(icon, color=pm.themes.theme.palette.text, size=50),
+                            f.Icon(icon, color=pm.themes.current.palette.text, size=50),
                             alignment=f.alignment.center,
                         ),
                         f.Container(
@@ -62,13 +62,13 @@ class cf:
             super().__init__(
                 style=f.ButtonStyle(
                     bgcolor={
-                        f.ControlState.HOVERED: pm.themes.theme.palette.bg_high_hover,
-                        f.ControlState.DEFAULT: pm.themes.theme.palette.bg_high_selection,
+                        f.ControlState.HOVERED: pm.themes.current.palette.bg_high_hover,
+                        f.ControlState.DEFAULT: pm.themes.current.palette.bg_high_selection,
                     },
                     padding=20,
                     shape=f.RoundedRectangleBorder(radius=5),
                     elevation=0,
-                    color=pm.themes.theme.palette.text,
+                    color=pm.themes.current.palette.text,
                 ),
                 content=content,
                 width=200,
@@ -80,29 +80,29 @@ class cf:
         def __init__(self, icon: f.Icon, on_click: Callable, tooltip: str | None = None):
             super().__init__(
                 icon=icon,
-                icon_color=pm.themes.theme.palette.text,
+                icon_color=pm.themes.current.palette.text,
                 on_click=on_click,
                 tooltip=tooltip,
             )
 
     class Divider(f.Divider):
         def __init__(self, alt=False, thickness=1):
-            super().__init__(color=pm.themes.theme.palette.divider_alt if alt else pm.themes.theme.palette.divider, thickness=thickness)
+            super().__init__(color=pm.themes.current.palette.divider_alt if alt else pm.themes.current.palette.divider, thickness=thickness)
 
     class Switch(f.Switch):
         def __init__(self, value: bool | None = None, on_change: Callable | None = None, data: Any | None = None):
             super().__init__(
                 value=value,
-                inactive_track_color=pm.themes.theme.palette.bg,
+                inactive_track_color=pm.themes.current.palette.bg,
                 track_outline_color={
                     f.ControlState.SELECTED: f.Colors.TRANSPARENT,
-                    f.ControlState.DEFAULT: pm.themes.theme.palette.bg_high_hover,
+                    f.ControlState.DEFAULT: pm.themes.current.palette.bg_high_hover,
                 },
                 thumb_color={
-                    f.ControlState.SELECTED: pm.themes.theme.palette.primary,
-                    f.ControlState.DEFAULT: pm.themes.theme.palette.bg_high_hover,
+                    f.ControlState.SELECTED: pm.themes.current.palette.primary,
+                    f.ControlState.DEFAULT: pm.themes.current.palette.bg_high_hover,
                 },
-                active_color=pm.themes.theme.palette.primary,
+                active_color=pm.themes.current.palette.primary,
                 data=data,
                 on_change=on_change,
             )
@@ -114,11 +114,11 @@ class cf:
                 value=value,
                 multiline=multiline,
                 max_lines=max_lines,
-                border_color=pm.themes.theme.palette.divider,
+                border_color=pm.themes.current.palette.divider,
                 on_change=on_change,
-                cursor_color=pm.themes.theme.palette.primary,
-                focused_border_color=pm.themes.theme.palette.primary,
-                label_style=f.TextStyle(color=pm.themes.theme.palette.text),
+                cursor_color=pm.themes.current.palette.primary,
+                focused_border_color=pm.themes.current.palette.primary,
+                label_style=f.TextStyle(color=pm.themes.current.palette.text),
                 input_filter=input_filter,
             )
 
@@ -127,7 +127,7 @@ class cf:
             super().__init__(
                 label=label,
                 value=value,
-                active_color=pm.themes.theme.palette.primary,
+                active_color=pm.themes.current.palette.primary,
                 check_color=f.Colors.BLACK,
             )
 
@@ -136,7 +136,7 @@ class cf:
             super().__init__(
                 label=label,
                 value=value,
-                active_color=pm.themes.theme.palette.primary,
+                active_color=pm.themes.current.palette.primary,
             )
 
     class Text(f.Text):
@@ -150,7 +150,7 @@ class cf:
             super().__init__(
                 value=text,
                 size=size,
-                color=pm.themes.theme.palette.text_muted if dimmed else pm.themes.theme.palette.text,
+                color=pm.themes.current.palette.text_muted if dimmed else pm.themes.current.palette.text,
                 overflow=overflow,
                 text_align=text_align,
             )
@@ -160,7 +160,7 @@ class cf:
             super().__init__(
                 content=cf.Text(text, size=cf.Text.Size.MEDIUM),
                 duration=2000,
-                bgcolor=color if color else pm.themes.theme.palette.info,
+                bgcolor=color if color else pm.themes.current.palette.info,
             )
             page.open(self)
 
@@ -178,7 +178,7 @@ class cf:
                 ),
                 content=content,
                 actions_alignment=f.MainAxisAlignment.END,
-                bgcolor=pm.themes.theme.palette.bg,
+                bgcolor=pm.themes.current.palette.bg,
                 shape=f.RoundedRectangleBorder(radius=5),
                 on_dismiss=on_dismiss,
                 alignment=alignment,
@@ -206,7 +206,7 @@ class cf:
 
     @staticmethod
     def show_loading(page: f.Page):
-        loading = f.Container(
+        pm.active_loading_control = f.Container(
             f.Column(
                 [
                     f.Container(
@@ -229,27 +229,26 @@ class cf:
             opacity=0.5,
             bgcolor=f.Colors.BLACK,
         )
-        page.overlay.append(loading)
+        page.overlay.append(pm.active_loading_control)
         page.appbar.opacity = 0
         page.appbar.bgcolor = f.Colors.BLACK
         page.appbar.disabled = True
 
         page.update()
-        return loading
-
+        
     @staticmethod
-    def hide_loading(loading: f.Container):
-        loading.page.overlay.remove(loading)
-        loading.page.appbar.opacity = 1
-        loading.page.appbar.bgcolor = pm.themes.theme.palette.bg_low
-        loading.page.appbar.disabled = False
-        loading.page.update()
+    def hide_loading():
+        pm.active_loading_control.page.overlay.remove(pm.active_loading_control)
+        pm.active_loading_control.page.appbar.opacity = 1
+        pm.active_loading_control.page.appbar.bgcolor = pm.themes.current.palette.bg_low
+        pm.active_loading_control.page.appbar.disabled = False
+        pm.active_loading_control.page.update()
 
     @staticmethod
     def load_for(seconds: float, page: f.Page):
-        loading = cf.show_loading(page)
+        cf.show_loading(page)
         time.sleep(seconds)
-        cf.hide_loading(loading)
+        cf.hide_loading()
 
 
 def main(page: f.Page, pm: PluginManager):
@@ -268,7 +267,7 @@ def main(page: f.Page, pm: PluginManager):
                         f.Column(
                             [cf.Radio(value=name, label=name) for name in pm.themes.get_themes()],
                         ),
-                        value=pm.themes.theme.name,
+                        value=pm.themes.current.name,
                     ),
                 ],
                 spacing=20,
@@ -320,8 +319,10 @@ def main(page: f.Page, pm: PluginManager):
 
     def uninstall_plugin(e: f.ControlEvent):
         def handle_uninstall_plugin(e: f.ControlEvent):
+            cf.show_loading(page)
             pm.uninstall_plugin()
             refresh_page()
+            cf.hide_loading()
             cf.ShowSnackBar("The plugin has been uninstalled successfully", page)
 
         cf.Dialog(
@@ -375,7 +376,7 @@ def main(page: f.Page, pm: PluginManager):
             refresh_page()
             cf.ShowSnackBar("The plugins have been installed successfully", page)
         else:
-            cf.ShowSnackBar("No valid plugins were found", page, pm.themes.theme.palette.error)
+            cf.ShowSnackBar("No valid plugins were found", page, pm.themes.current.palette.error)
 
     def open_dnd_dialog(e: f.ControlEvent):
         if page.dialog if hasattr(page, "dialog") else False:
@@ -403,12 +404,12 @@ def main(page: f.Page, pm: PluginManager):
             pm.ai_client.set_api_key(key)
             pm.save_session()
 
-        loading = cf.show_loading(page)
+        cf.show_loading(page)
         check_validation = pm.ai_client.is_key_valid()
-        cf.hide_loading(loading)
+        cf.hide_loading()
 
         if not check_validation and key:
-            cf.ShowSnackBar("The key is invalid. Please enter a valid Gemeni API key.", page, pm.themes.theme.palette.error)
+            cf.ShowSnackBar("The key is invalid. Please enter a valid Gemeni API key.", page, pm.themes.current.palette.error)
 
         if not check_validation:
             cf.Dialog(
@@ -426,14 +427,14 @@ def main(page: f.Page, pm: PluginManager):
         def handle_plugin_generation(e, prompt):
             if not prompt:
                 generate_plugin_btn(e)
-            loading = cf.show_loading(page)
+            cf.show_loading(page)
             result = pm.generate_plugin(prompt)
-            cf.hide_loading(loading)
+            cf.hide_loading()
             if result:
                 refresh_page()
                 cf.ShowSnackBar("The plugin has been generated successfully", page)
             else:
-                cf.ShowSnackBar("An error occurred while generating the plugin", page, pm.themes.theme.palette.error)
+                cf.ShowSnackBar("An error occurred while generating the plugin", page, pm.themes.current.palette.error)
                 cf.Dialog(
                     "Plugin Generation Failed",
                     "An error occurred while generating the plugin",
@@ -468,7 +469,7 @@ def main(page: f.Page, pm: PluginManager):
         def handle_make_plugin(e: f.ControlEvent, name: str):
             name = name.strip()
             if not name or name == PLUGIN_TEMPLATE.name:
-                cf.ShowSnackBar("The name cannot be empty or the same as the template plugin", page, pm.themes.theme.palette.error)
+                cf.ShowSnackBar("The name cannot be empty or the same as the template plugin", page, pm.themes.current.palette.error)
                 return
             shutil.copytree(PLUGIN_TEMPLATE, TEMP_DIR / name)
             fs.move_contents(TEMP_DIR, PLUGINS_DIR)
@@ -523,14 +524,15 @@ def main(page: f.Page, pm: PluginManager):
         page.dialog = dialog
         page.dialog.show(page)
 
-    def refresh_page(e: f.ControlEvent | None = None):
-        # loading = cf.show_loading(page)
+    def refresh_page(e: f.ControlEvent | None = None, snackbar = False):
+        # cf.show_loading(page)
         pm.reload_plugins()
         page.controls[0].controls[0] = get_expansion_tiles()
         page.controls[0].controls[1] = get_plugin_page()
         page.update()
-        # cf.hide_loading(loading)
-        cf.ShowSnackBar("The plugins have been refreshed successfully", page)
+        # cf.hide_loading()
+        if snackbar:
+            cf.ShowSnackBar("The plugins have been refreshed successfully", page)
 
     def get_expansion_tiles():
         if not pm.items:
@@ -540,7 +542,7 @@ def main(page: f.Page, pm: PluginManager):
                     dimmed=True,
                     size=cf.Text.Size.SMALL,
                 ),
-                bgcolor=pm.themes.theme.palette.bg_low,
+                bgcolor=pm.themes.current.palette.bg_low,
                 padding=f.Padding(20, 0, 20, 20),
                 width=450,
                 alignment=f.alignment.center,
@@ -554,7 +556,7 @@ def main(page: f.Page, pm: PluginManager):
                             cf.Text("Plugins", size=cf.Text.Size.MEDIUM),
                             f.Row(
                                 [
-                                    cf.IconButton(f.Icons.REFRESH, on_click=refresh_page, tooltip="Refresh"),
+                                    cf.IconButton(f.Icons.REFRESH,  tooltip="Refresh", on_click=lambda e: refresh_page(e, True)),
                                     enable_disable_btn := cf.Button(text="Disable All" if pm.is_all_plugin_enabled() else "Enable All", on_click=toggle_all_plugins),
                                 ],
                             ),
@@ -569,7 +571,7 @@ def main(page: f.Page, pm: PluginManager):
                                     f.Container(
                                         content=__get_expansion_tiles(plugin),
                                         padding=15,
-                                        bgcolor=pm.themes.theme.palette.bg,
+                                        bgcolor=pm.themes.current.palette.bg,
                                         border_radius=5,
                                     )
                                     for plugin in pm.items
@@ -583,7 +585,7 @@ def main(page: f.Page, pm: PluginManager):
                     ),
                 ],
             ),
-            bgcolor=pm.themes.theme.palette.bg_low,
+            bgcolor=pm.themes.current.palette.bg_low,
             padding=f.Padding(20, 0, 20, 20),
             width=450,
             alignment=f.alignment.top_left,
@@ -616,9 +618,9 @@ def main(page: f.Page, pm: PluginManager):
                 ),
                 style=f.ButtonStyle(
                     bgcolor={
-                        f.ControlState.HOVERED: pm.themes.theme.palette.bg_selection,
-                        f.ControlState.FOCUSED: pm.themes.theme.palette.bg_selection,
-                        f.ControlState.DEFAULT: pm.themes.theme.palette.bg_selection if pm.selected_plugin.id == item.id else pm.themes.theme.palette.bg,
+                        f.ControlState.HOVERED: pm.themes.current.palette.bg_selection,
+                        f.ControlState.FOCUSED: pm.themes.current.palette.bg_selection,
+                        f.ControlState.DEFAULT: pm.themes.current.palette.bg_selection if pm.selected_plugin.id == item.id else pm.themes.current.palette.bg,
                     },
                     shape=f.RoundedRectangleBorder(radius=5),
                     elevation=0,
@@ -639,7 +641,7 @@ def main(page: f.Page, pm: PluginManager):
                         [__get_expansion_tiles(sub_item) for sub_item in item.sub_items],
                         spacing=5,
                     ),
-                    border=f.Border(left=f.BorderSide(color=pm.themes.theme.palette.divider, width=2)),
+                    border=f.Border(left=f.BorderSide(color=pm.themes.current.palette.divider, width=2)),
                     padding=f.padding.Padding(15, 5, 0, 5),
                 ),
             ],
@@ -647,7 +649,7 @@ def main(page: f.Page, pm: PluginManager):
             shape=f.RoundedRectangleBorder(radius=5),
             maintain_state=True,
             initially_expanded=True,
-            icon_color=pm.themes.theme.palette.text,
+            icon_color=pm.themes.current.palette.text,
         )
         return item.controls.tile
 
@@ -655,7 +657,7 @@ def main(page: f.Page, pm: PluginManager):
         if not pm.selected_plugin:
             return f.Container(
                 cf.Text("Click on the plugin to view its details", dimmed=True, size=cf.Text.Size.SMALL),
-                bgcolor=pm.themes.theme.palette.bg,
+                bgcolor=pm.themes.current.palette.bg,
                 padding=20,
                 border_radius=f.border_radius.BorderRadius(10, 0, 0, 0),
                 width=450,
@@ -676,8 +678,8 @@ def main(page: f.Page, pm: PluginManager):
                                     f.Row(
                                         [
                                             # Component.Button("Uninstall"),
-                                            cf.Button(text="View in Explorer", on_click=lambda e: (os.system(f'explorer "{pm.selected_plugin.path}"'), cf.load_for(0.5, page))),
-                                            cf.Button(text="Edit in VSCode", on_click=lambda e: (os.system(f'code "{pm.selected_plugin.path}"'), cf.load_for(0.5, page))),
+                                            cf.Button(text="View in Explorer", on_click=lambda e: (cf.show_loading(page),os.system(f'explorer "{pm.selected_plugin.path}"'), cf.hide_loading())),
+                                            cf.Button(text="Open in VSCode", on_click=lambda e: (cf.show_loading(page),os.system(f'code "{pm.selected_plugin.path}"'), cf.hide_loading())),                                            
                                             cf.Button(text="Uninstall Plugin", on_click=uninstall_plugin),
                                         ],
                                     ),
@@ -732,13 +734,13 @@ def main(page: f.Page, pm: PluginManager):
                         expand=True,
                         scrollable=True,
                         width=1000,
-                        divider_color=pm.themes.theme.palette.divider,
-                        label_color=pm.themes.theme.palette.text,
-                        indicator_color=pm.themes.theme.palette.secondary,
+                        divider_color=pm.themes.current.palette.divider,
+                        label_color=pm.themes.current.palette.text,
+                        indicator_color=pm.themes.current.palette.secondary,
                     ),
                 ],
             ),
-            bgcolor=pm.themes.theme.palette.bg,
+            bgcolor=pm.themes.current.palette.bg,
             padding=20,
             border_radius=f.border_radius.BorderRadius(10, 0, 0, 0),
             width=450,
@@ -762,8 +764,8 @@ def main(page: f.Page, pm: PluginManager):
             pm.controls.description.value = pm.selected_plugin.description
             pm.controls.markdown.value = open(pm.selected_plugin.markdown, "r", encoding="utf-8").read()
             pm.controls.configs.content = get_plugin_config()
-            pm.previous_plugin.controls.tile.style.bgcolor[f.ControlState.DEFAULT] = pm.themes.theme.palette.bg
-            pm.selected_plugin.controls.tile.style.bgcolor[f.ControlState.DEFAULT] = pm.themes.theme.palette.bg_selection
+            pm.previous_plugin.controls.tile.style.bgcolor[f.ControlState.DEFAULT] = pm.themes.current.palette.bg
+            pm.selected_plugin.controls.tile.style.bgcolor[f.ControlState.DEFAULT] = pm.themes.current.palette.bg_selection
         page.update()
 
     def toggle_plugin(e: f.ControlEvent):
@@ -901,7 +903,7 @@ def main(page: f.Page, pm: PluginManager):
     page.fonts = {"Inter": "Inter[slnt,wght].ttf"}
     page.theme = f.Theme(font_family="Inter")
     page.padding = 0
-    page.bgcolor = pm.themes.theme.palette.bg_low
+    page.bgcolor = pm.themes.current.palette.bg_low
     page.window_min_height = 610
     page.window_min_width = 713
 
@@ -914,18 +916,18 @@ def main(page: f.Page, pm: PluginManager):
                 cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
                 f.PopupMenuButton(
                     items=[
-                        f.PopupMenuItem(text="Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: (os.system(f'explorer "{PLUGINS_DIR}"'), cf.load_for(0.5, page))),
+                        f.PopupMenuItem(text="Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{PLUGINS_DIR}"'), cf.hide_loading())),
                         f.PopupMenuItem(text="Force Remove Plugin", icon=f.Icons.DELETE, on_click=force_remove_plugin),
                         f.PopupMenuItem(text="Change Theme", icon=f.Icons.PALETTE, on_click=change_theme),
                     ],
-                    bgcolor=pm.themes.theme.palette.bg_high_selection,
+                    bgcolor=pm.themes.current.palette.bg_high_selection,
                     menu_position=f.PopupMenuPosition.UNDER,
                 ),
             ],
             spacing=10,
         ),
-        bgcolor=pm.themes.theme.palette.bg_low,
-        surface_tint_color=pm.themes.theme.palette.bg_low,
+        bgcolor=pm.themes.current.palette.bg_low,
+        surface_tint_color=pm.themes.current.palette.bg_low,
     )
 
     page.add(

@@ -248,7 +248,7 @@ class PluginManager:
     def get_settings(self):
         return {
             "ai_api_key": self.ai_client.get_api_key(),
-            "theme": self.themes.theme.name,
+            "theme": self.themes.current.name,
         }
 
     def set_settings(self, settings):
