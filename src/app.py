@@ -230,18 +230,12 @@ class cf:
             bgcolor=f.Colors.BLACK,
         )
         page.overlay.append(pm.active_loading_control)
-        page.appbar.opacity = 0
-        page.appbar.bgcolor = f.Colors.BLACK
-        page.appbar.disabled = True
 
         page.update()
 
     @staticmethod
     def hide_loading():
         pm.active_loading_control.page.overlay.remove(pm.active_loading_control)
-        pm.active_loading_control.page.appbar.opacity = 1
-        pm.active_loading_control.page.appbar.bgcolor = pm.themes.current.palette.bg_low
-        pm.active_loading_control.page.appbar.disabled = False
         pm.active_loading_control.page.update()
 
     @staticmethod
