@@ -1,0 +1,25 @@
+{
+    "name": "Saber",
+    "description": "A futuristic theme inspired by the glowing colors of lightsabers and the dark ambiance of the Star Wars universe.",
+    "palette": {
+        "bg": "#0d0d0d",
+        "bg-selection": "#1a1a1a",
+        "bg-low": "#121212",
+        "bg-low-selection": "#1e1e1e",
+        "bg-low-hover": "#252525",
+        "bg-high": "#1a1a1a",
+        "bg-high-selection": "#262626",
+        "bg-high-hover": "#2e2e2e",
+        "primary": "#ff4444",
+        "secondary": "#44aaff",
+        "tertiary": "#ffcc44",
+        "text": "#f0f0f0",
+        "text-muted": "#a0a0a0",
+        "divider": "#333333",
+        "divider-alt": "#44aaff",
+        "error": "#ff4444",
+        "warning": "#ffcc44",
+        "info": "#44aaff",
+        "success": "#44ff44"
+    }
+}

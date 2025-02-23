@@ -478,7 +478,7 @@ class PluginManager:
         session = {"items": items, "settings": self.get_settings()}
         json.dump(session, open(SESSION_FILE, "w"), indent=4)
 
-    def load_session(self):
+    def load_session(self, only_items=False):
         def deserialize_item(data):
             if data["class"] == "Plugin":
                 plugin = Plugin(name=data["name"])
@@ -497,7 +497,7 @@ class PluginManager:
 
         prev_session = PluginManager(no_setup=True)
         session_data = json.load(open(SESSION_FILE))
-        self.set_settings(session_data["settings"])
+        self.set_settings(session_data["settings"]) if not only_items else None
         prev_session.items = [deserialize_item(item) for item in session_data["items"]]
         self.copy_plugin_configuration(prev_session)
 

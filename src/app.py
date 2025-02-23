@@ -235,7 +235,7 @@ class cf:
         page.appbar.disabled = True
 
         page.update()
-        
+
     @staticmethod
     def hide_loading():
         pm.active_loading_control.page.overlay.remove(pm.active_loading_control)
@@ -255,7 +255,17 @@ def main(page: f.Page, pm: PluginManager):
     def change_theme(e: f.ControlEvent):
         def handle_change_theme(theme: str):
             pm.themes.set_theme(theme)
+            pm.save_session()
+            page.remove(page.controls[0])
+            page.add(
+                f.Row(
+                    controls=[get_expansion_tiles(), get_plugin_page()],
+                    expand=True,
+                    spacing=0,
+                ),
+            )
             page.update()
+            cf.ShowSnackBar("The theme has been changed successfully", page)
 
         cf.Dialog(
             "Change Theme",
@@ -524,11 +534,58 @@ def main(page: f.Page, pm: PluginManager):
         page.dialog = dialog
         page.dialog.show(page)
 
-    def refresh_page(e: f.ControlEvent | None = None, snackbar = False):
+    def make_page():
+        if page.controls:
+            page.remove(page.controls[0])
+
+        page.add(
+            f.Row(
+                controls=[
+                    get_expansion_tiles(),
+                    get_plugin_page(),
+                ],
+                expand=True,
+                spacing=0,
+            )
+        )
+
+    def make_appbar():
+        appbar = f.AppBar(
+            title=f.Row(
+                [
+                    cf.Text("Context Menu Plugin Manager", size=cf.Text.Size.LARGE),
+                    f.Container(expand=True),
+                    cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin_btn),
+                    cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
+                    f.PopupMenuButton(
+                        items=[
+                            f.PopupMenuItem(text="Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{PLUGINS_DIR}"'), cf.hide_loading())),
+                            f.PopupMenuItem(text="Force Remove Plugin", icon=f.Icons.DELETE, on_click=force_remove_plugin),
+                            f.PopupMenuItem(text="Change Theme", icon=f.Icons.PALETTE, on_click=change_theme),
+                        ],
+                        bgcolor=pm.themes.current.palette.bg_high_selection,
+                        menu_position=f.PopupMenuPosition.UNDER,
+                    ),
+                ],
+                spacing=10,
+            ),
+            bgcolor=pm.themes.current.palette.bg_low,
+            surface_tint_color=pm.themes.current.palette.bg_low,
+        )
+            # page.remove(page.appbar_ref)
+        if page.appbar_ref if hasattr(page, "appbar_ref") else False:
+            page.appbar_ref = appbar
+        else:
+            page.appbar = appbar
+            page.appbar_ref = appbar
+        page.update()
+        # page.appbar.update()
+
+    def refresh_page(e: f.ControlEvent | None = None, snackbar=False, load_plugins=False):
         # cf.show_loading(page)
         pm.reload_plugins()
-        page.controls[0].controls[0] = get_expansion_tiles()
-        page.controls[0].controls[1] = get_plugin_page()
+        make_page()
+        make_appbar()
         page.update()
         # cf.hide_loading()
         if snackbar:
@@ -556,7 +613,7 @@ def main(page: f.Page, pm: PluginManager):
                             cf.Text("Plugins", size=cf.Text.Size.MEDIUM),
                             f.Row(
                                 [
-                                    cf.IconButton(f.Icons.REFRESH,  tooltip="Refresh", on_click=lambda e: refresh_page(e, True)),
+                                    cf.IconButton(f.Icons.REFRESH, tooltip="Refresh", on_click=lambda e: refresh_page(e, True)),
                                     enable_disable_btn := cf.Button(text="Disable All" if pm.is_all_plugin_enabled() else "Enable All", on_click=toggle_all_plugins),
                                 ],
                             ),
@@ -678,8 +735,8 @@ def main(page: f.Page, pm: PluginManager):
                                     f.Row(
                                         [
                                             # Component.Button("Uninstall"),
-                                            cf.Button(text="View in Explorer", on_click=lambda e: (cf.show_loading(page),os.system(f'explorer "{pm.selected_plugin.path}"'), cf.hide_loading())),
-                                            cf.Button(text="Open in VSCode", on_click=lambda e: (cf.show_loading(page),os.system(f'code "{pm.selected_plugin.path}"'), cf.hide_loading())),                                            
+                                            cf.Button(text="View in Explorer", on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{pm.selected_plugin.path}"'), cf.hide_loading())),
+                                            cf.Button(text="Open in VSCode", on_click=lambda e: (cf.show_loading(page), os.system(f'code "{pm.selected_plugin.path}"'), cf.hide_loading())),
                                             cf.Button(text="Uninstall Plugin", on_click=uninstall_plugin),
                                         ],
                                     ),
@@ -907,36 +964,10 @@ def main(page: f.Page, pm: PluginManager):
     page.window_min_height = 610
     page.window_min_width = 713
 
-    page.appbar = f.AppBar(
-        title=f.Row(
-            [
-                cf.Text("Context Menu Plugin Manager", size=cf.Text.Size.LARGE),
-                f.Container(expand=True),
-                cf.Button("Generate Plugin", icon=f.Icons.BOLT, on_click=generate_plugin_btn),
-                cf.Button("Add Plugin", icon=f.Icons.ADD, on_click=add_plugin_dialog),
-                f.PopupMenuButton(
-                    items=[
-                        f.PopupMenuItem(text="Open Plugins Folder", icon=f.Icons.FOLDER, on_click=lambda e: (cf.show_loading(page), os.system(f'explorer "{PLUGINS_DIR}"'), cf.hide_loading())),
-                        f.PopupMenuItem(text="Force Remove Plugin", icon=f.Icons.DELETE, on_click=force_remove_plugin),
-                        f.PopupMenuItem(text="Change Theme", icon=f.Icons.PALETTE, on_click=change_theme),
-                    ],
-                    bgcolor=pm.themes.current.palette.bg_high_selection,
-                    menu_position=f.PopupMenuPosition.UNDER,
-                ),
-            ],
-            spacing=10,
-        ),
-        bgcolor=pm.themes.current.palette.bg_low,
-        surface_tint_color=pm.themes.current.palette.bg_low,
-    )
+    make_page()
+    make_appbar()
 
-    page.add(
-        f.Row(
-            controls=[get_expansion_tiles(), get_plugin_page()],
-            expand=True,
-            spacing=0,
-        ),
-    )
+    page.update()
 
     time.sleep(0.2)
     loaded_DLL = LoadDLL(
